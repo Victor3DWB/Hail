@@ -5,22 +5,58 @@
 #include "DebuggerTypes.h"
 
 class asIScriptEngine;
-
 struct asSFuncPtr;
 
 namespace Hail
 {
 	namespace AngelScript
 	{
+		enum class EVariableTypeDataState
+		{
+			Const,
+			Ref,
+			ConstRef,
+			None
+		};
 		// function argument (Type Name, )
 		struct VariableTypeData
 		{
+			VariableTypeData() = default;
+
+			VariableTypeData(const char* name, const char* type, bool isConst = false, bool isRef = false, bool replaceNameWithIn = false) :
+				m_name(name),
+				m_type(type),
+				m_bIsConst(isConst),
+				m_bIsRef(isRef),
+				m_bReplaceNameWithIn(replaceNameWithIn)
+			{
+			}
+			VariableTypeData(const char* name, const char* type, EVariableTypeDataState state, const char* extraArgument = "") :
+				m_name(name),
+				m_type(type),
+				m_extraArgument(extraArgument)
+			{
+				if (state == EVariableTypeDataState::Const)
+				{
+					m_bIsConst = true;
+				}
+				else if (state == EVariableTypeDataState::Ref)
+				{
+					m_bIsRef = true;
+				}
+				else if (state == EVariableTypeDataState::ConstRef)
+				{
+					m_bIsConst = true;
+					m_bIsRef = true;
+				}
+			}
 			String64 m_name;
 			String64 m_type;
 			bool m_bIsConst = false;
 			// Only used for arguments
 			bool m_bIsRef = false;
 			bool m_bReplaceNameWithIn = false;
+			String64 m_extraArgument;
 		};
 
 		class TypeDebuggerRegistry
@@ -87,16 +123,21 @@ namespace Hail
 		public:
 			explicit TypeRegistry(asIScriptEngine* pAsEngine, bool bEnableDebugger);
 
-			bool RegisterType(const char* typeName, uint32 sizeOfType, uint64 flags, const char* sourceFileName, int line);
+			// Note: const char* registerNameOverride is for template types as the register name is not the same as the Object name, f I add more template types I will revisit this. 
+			bool RegisterType(const char* typeName, uint32 sizeOfType, uint64 flags, const char* sourceFileName, int line, const char* registerNameOverride = nullptr);
 			bool RegisterVariableFunction(const char* typeName, ToVariableCallback callbackToRegister);
 
 			bool RegisterClassMethod(const char* typeName, VariableTypeData function, VectorOnStack<VariableTypeData, 8u> argumentVariables, const asSFuncPtr& funcPointer, const char* sourceFileName, int line);
+			bool RegisterClassMethodGenericFuncPtr(const char* typeName, VariableTypeData function, VectorOnStack<VariableTypeData, 8u> argumentVariables, const asSFuncPtr& funcPointer, const char* sourceFileName, int line);
 			// Creates setters and getters for properties: "void set_x(float) property". Like exampleVector.x or exampleVector.y = 10.0
 			// Does not get sent to Angelscript LSP
 			bool RegisterClassGetSetter(const char* typeName, VariableTypeData function, const asSFuncPtr& funcPointer, bool bIsSetter, const char* sourceFileName, int line);
 			bool RegisterClassOperatorOverload(const char* typeName, VariableTypeData function, const asSFuncPtr& funcPointer, const char* sourceFileName, int line);
+			bool RegisterClassOperatorOverloadGenericFuncPtr(const char* typeName, VariableTypeData function, const asSFuncPtr& funcPointer, const char* sourceFileName, int line);
 			bool RegisterClassObjectMember(const char* typeName, VariableTypeData memberVariable, int byteOffset, const char* sourceFileName, int line);
-			bool RegisterClassConstructor(const char* typeName, VectorOnStack<VariableTypeData, 8u> argumentVariables, VectorOnStack<VariableTypeData, 8u> listArguments, const asSFuncPtr& funcPointer,  const char* sourceFileName, int line);
+			// if bConstroctur == false it is a destructor
+			bool RegisterClassConstructor(const char* typeName, VectorOnStack<VariableTypeData, 8u> argumentVariables, VectorOnStack<VariableTypeData, 8u> listArguments, const asSFuncPtr& funcPointer, bool bConstroctur, const char* sourceFileName, int line);
+			bool RegisterManagedClassConstructor(const char* typeName, const StringL& constructor, VectorOnStack<VariableTypeData, 8u> argumentVariables, int angelscriptFlags, int angelscriptCallConvention, const asSFuncPtr& funcPointer, const char* sourceFileName, int line);
 
 			bool RegisterGlobalMethod(VariableTypeData function, VectorOnStack<VariableTypeData, 8u> argumentVariables, const asSFuncPtr& funcPointer, const char* sourceFileName, int line);
 			bool RegisterGlobalEnumValue(const char* name, const char* valueName, uint32 value, const char* sourceFileName, int line);

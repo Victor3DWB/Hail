@@ -39,12 +39,106 @@ namespace
 				}
 			}
 
+			if (!varTypeData.m_extraArgument.Empty())
+			{
+				arguments += " ";
+				arguments += varTypeData.m_extraArgument;
+			}
+
 			if (i + 1 < argumentVariables.Size())
 			{
 				arguments += ", ";
 			}
 		}
 		return arguments;
+	}
+	StringL GetClassMethodDefinition(AngelScript::VariableTypeData function, VectorOnStack<AngelScript::VariableTypeData, 8u> argumentVariables)
+	{
+		StringL declaration;
+		StringL arguments = GetArgumentsFromList(argumentVariables);
+
+		if (function.m_bIsConst)
+		{
+			if (arguments.Length())
+			{
+				if (function.m_bIsRef)
+				{
+					declaration = StringL::Format("const %s &%s(%s) const", function.m_type.Data(), function.m_name.Data(), arguments.Data());
+				}
+				else
+				{
+					declaration = StringL::Format("%s %s(%s) const", function.m_type.Data(), function.m_name.Data(), arguments.Data());
+				}
+			}
+			else
+			{
+				if (function.m_bIsRef)
+				{
+					declaration = StringL::Format("const %s &%s() const", function.m_type.Data(), function.m_name.Data());
+				}
+				else
+				{
+					declaration = StringL::Format("%s %s() const", function.m_type.Data(), function.m_name.Data());
+				}
+			}
+		}
+		else
+		{
+			if (arguments.Length())
+			{
+				if (function.m_bIsRef)
+				{
+					declaration = StringL::Format("%s &%s(%s)", function.m_type.Data(), function.m_name.Data(), arguments.Data());
+				}
+				else
+				{
+					declaration = StringL::Format("%s %s(%s)", function.m_type.Data(), function.m_name.Data(), arguments.Data());
+				}
+			}
+			else
+			{
+				if (function.m_bIsRef)
+				{
+					declaration = StringL::Format("%s &%s()", function.m_type.Data(), function.m_name.Data());
+				}
+				else
+				{
+					declaration = StringL::Format("%s %s()", function.m_type.Data(), function.m_name.Data());
+				}
+			}
+		}
+		return declaration;
+	}
+	StringL GetClassOperatorDeclaration(const char* typeName, AngelScript::VariableTypeData function)
+	{
+
+		StringL declaration;
+		if (function.m_bIsConst)
+		{
+			// bool opEquals(const Vec2 &in) const
+
+			if (function.m_bIsRef)
+			{
+				declaration = StringL::Format("%s &%s(const %s &in) const", function.m_type, function.m_name, typeName);
+			}
+			else
+			{
+				declaration = StringL::Format("%s %s(const %s &in) const", function.m_type, function.m_name, typeName);
+			}
+		}
+		else
+		{
+			//Vec2 &opAddAssign(const Vec2 &in)
+			if (function.m_bIsRef)
+			{
+				declaration = StringL::Format("%s &%s(const %s &in)", function.m_type, function.m_name, typeName);
+			}
+			else
+			{
+				declaration = StringL::Format("%s %s(const %s &in)", function.m_type, function.m_name, typeName);
+			}
+		}
+		return declaration;
 	}
 }
 
@@ -57,7 +151,7 @@ Hail::AngelScript::TypeRegistry::TypeRegistry(asIScriptEngine* pAsEngine, bool b
 	}
 }
 
-bool Hail::AngelScript::TypeRegistry::RegisterType(const char* typeName, uint32 sizeOfType, uint64 flags, const char* sourceFileName, int line)
+bool Hail::AngelScript::TypeRegistry::RegisterType(const char* typeName, uint32 sizeOfType, uint64 flags, const char* sourceFileName, int line, const char* registerNameOverride)
 {
 	for (uint32 i = 0; i < m_registeredTypes.Size(); i++)
 	{
@@ -78,7 +172,7 @@ bool Hail::AngelScript::TypeRegistry::RegisterType(const char* typeName, uint32 
 
 	if (r >= 0 && m_pDebuggerRegistry)
 	{
-		m_pDebuggerRegistry->RegisterClass(typeName, sourceFileName, line);
+		m_pDebuggerRegistry->RegisterClass(registerNameOverride ? registerNameOverride : typeName, sourceFileName, line);
 	}
 
     return r >= 0;
@@ -103,24 +197,23 @@ bool Hail::AngelScript::TypeRegistry::RegisterVariableFunction(const char* typeN
 
 bool Hail::AngelScript::TypeRegistry::RegisterClassMethod(const char* typeName, VariableTypeData function, VectorOnStack<VariableTypeData, 8u> argumentVariables, const asSFuncPtr& funcPointer, const char* sourceFileName, int line)
 {
-	StringL declaration;
-	if (argumentVariables.Size() > 0)
+	StringL declaration = GetClassMethodDefinition(function, argumentVariables);
+
+	int r = m_pScriptEngine->RegisterObjectMethod(typeName, declaration.Data(), funcPointer, asCALL_THISCALL);
+
+	if (r >= 0 && m_pDebuggerRegistry)
 	{
-		StringL arguments = GetArgumentsFromList(argumentVariables);
-		declaration = StringL::Format("%s %s(%s)", function.m_type.Data(), function.m_name.Data(), arguments.Data());
-	}
-	else
-	{
-		declaration = StringL::Format("%s %s()", function.m_type.Data(), function.m_name.Data());
+		m_pDebuggerRegistry->RegisterClassMethod(typeName, function, argumentVariables, sourceFileName, line);
 	}
 
-	if (function.m_bIsConst)
-	{
-		declaration += " const";
-	}
+	return r >= 0;
+}
 
-	//float Length() const
-	int r = m_pScriptEngine->RegisterObjectMethod(typeName, declaration.Data(), funcPointer, asCALL_THISCALL); H_ASSERT(r >= 0, StringL::Format("Failed to register Vec2 func %s", function.m_name.Data()));
+bool Hail::AngelScript::TypeRegistry::RegisterClassMethodGenericFuncPtr(const char* typeName, VariableTypeData function, VectorOnStack<VariableTypeData, 8u> argumentVariables, const asSFuncPtr& funcPointer, const char* sourceFileName, int line)
+{
+	StringL declaration = GetClassMethodDefinition(function, argumentVariables);
+
+	int r = m_pScriptEngine->RegisterObjectMethod(typeName, declaration.Data(), funcPointer, asCALL_GENERIC);
 
 	if (r >= 0 && m_pDebuggerRegistry)
 	{
@@ -157,34 +250,21 @@ bool Hail::AngelScript::TypeRegistry::RegisterClassGetSetter(const char* typeNam
 
 bool Hail::AngelScript::TypeRegistry::RegisterClassOperatorOverload(const char* typeName, VariableTypeData function, const asSFuncPtr& funcPointer, const char* sourceFileName, int line)
 {
-
-	StringL declaration;
-	if (function.m_bIsConst)
-	{
-		// bool opEquals(const Vec2 &in) const
-
-		if (function.m_bIsRef)
-		{
-			declaration = StringL::Format("%s &%s(const %s &in) const", function.m_type, function.m_name, typeName);
-		}
-		else
-		{
-			declaration = StringL::Format("%s %s(const %s &in) const", function.m_type, function.m_name, typeName);
-		}
-	}
-	else
-	{
-		//Vec2 &opAddAssign(const Vec2 &in)
-		if (function.m_bIsRef)
-		{
-			declaration = StringL::Format("%s &%s(const %s &in)", function.m_type, function.m_name, typeName);
-		}
-		else
-		{
-			declaration = StringL::Format("%s %s(const %s &in)", function.m_type, function.m_name, typeName);
-		}
-	}
+	StringL declaration = GetClassOperatorDeclaration(typeName, function);
 	int r = m_pScriptEngine->RegisterObjectMethod(typeName, declaration.Data(), funcPointer, asCALL_THISCALL);
+
+	if (r >= 0 && m_pDebuggerRegistry)
+	{
+		m_pDebuggerRegistry->RegisterClassMethod(typeName, function, {}, sourceFileName, line);
+	}
+
+	return r >= 0;
+}
+
+bool Hail::AngelScript::TypeRegistry::RegisterClassOperatorOverloadGenericFuncPtr(const char* typeName, VariableTypeData function, const asSFuncPtr& funcPointer, const char* sourceFileName, int line)
+{
+	StringL declaration = GetClassOperatorDeclaration(typeName, function);
+	int r = m_pScriptEngine->RegisterObjectMethod(typeName, declaration.Data(), funcPointer, asCALL_GENERIC);
 
 	if (r >= 0 && m_pDebuggerRegistry)
 	{
@@ -207,7 +287,7 @@ bool Hail::AngelScript::TypeRegistry::RegisterClassObjectMember(const char* type
 	return r >= 0;
 }
 
-bool Hail::AngelScript::TypeRegistry::RegisterClassConstructor(const char* typeName, VectorOnStack<VariableTypeData, 8u> argumentVariables, VectorOnStack<VariableTypeData, 8u> listArguments, const asSFuncPtr& funcPointer, const char* sourceFileName, int line)
+bool Hail::AngelScript::TypeRegistry::RegisterClassConstructor(const char* typeName, VectorOnStack<VariableTypeData, 8u> argumentVariables, VectorOnStack<VariableTypeData, 8u> listArguments, const asSFuncPtr& funcPointer, bool bConstroctur, const char* sourceFileName, int line)
 {
 	StringL constructor;
 
@@ -238,7 +318,32 @@ bool Hail::AngelScript::TypeRegistry::RegisterClassConstructor(const char* typeN
 	r = m_pScriptEngine->RegisterObjectBehaviour("Vec2", asBEHAVE_LIST_CONSTRUCT, "void f(const int &in) {float, float}", asFUNCTION(Vec2ListConstructor), asCALL_CDECL_OBJLAST); H_ASSERT(r >= 0, "Failed to register Vec2 func");
 	*/
 	const asEBehaviours behavior = listArguments.Empty() ? asBEHAVE_CONSTRUCT : asBEHAVE_LIST_CONSTRUCT;
-	int r = m_pScriptEngine->RegisterObjectBehaviour(typeName, behavior, constructor.Data(), funcPointer, asCALL_CDECL_OBJLAST);
+	int r = m_pScriptEngine->RegisterObjectBehaviour(typeName, bConstroctur ? behavior : asBEHAVE_DESTRUCT, constructor.Data(), funcPointer, asCALL_CDECL_OBJLAST);
+	if (r >= 0 && bConstroctur  && m_pDebuggerRegistry)
+	{
+		VariableTypeData constructorDefinition;
+		constructorDefinition.m_name = typeName;
+		constructorDefinition.m_type = "constructor";
+		m_pDebuggerRegistry->RegisterClassMethod(typeName, constructorDefinition, argumentVariables, sourceFileName, line);
+	}
+	return r >= 0;
+}
+
+bool Hail::AngelScript::TypeRegistry::RegisterManagedClassConstructor(const char* typeName, const StringL& constructor, VectorOnStack<VariableTypeData, 8u> argumentVariables, int angelscriptFlags, int angelscriptCallConvention, const asSFuncPtr& funcPointer, const char* sourceFileName, int line)
+{
+	StringL finalConstructor;
+
+	if (argumentVariables.Empty())
+	{
+		finalConstructor = constructor;
+	}
+	else
+	{
+		const StringL constructorArguments = GetArgumentsFromList(argumentVariables);
+		finalConstructor = StringL::Format(constructor, constructorArguments.Data());
+	}
+
+	int r = m_pScriptEngine->RegisterObjectBehaviour(typeName, (asEBehaviours)angelscriptFlags, finalConstructor.Data(), funcPointer, angelscriptCallConvention);
 	if (r >= 0 && m_pDebuggerRegistry)
 	{
 		VariableTypeData constructorDefinition;

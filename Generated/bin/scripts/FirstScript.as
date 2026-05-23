@@ -1,48 +1,42 @@
 #include "IncludeScript.as"
 
+Foo TestClass();
+
 float gameTime = 0.0;
-//function AS
 Array<Vec2> savedPositions;
 Vec2 playerPosition = Vec2(0.5, 0.5);
-float movementSpeed = 0.01;
-
-int GetAMathematicalNumber(float gameTimeToInt)
-{
-    float constantValue = 1337.56789;
-    //returnValue += 27;
-    
-    int returnValue = int(gameTimeToInt);
-    returnValue += 27;
-    returnValue /= 2;
-    return returnValue++;
-}
+float movementSpeed = 5.0;
 
 void main()
 {
     gameTime += 0.4;
     Vec2 direction = GetDirectionInput(PlayerMoveJoystickL, 0);
     direction.y = direction.y * -1.0;
+    direction = direction.GetNormalized();
     playerPosition += direction * movementSpeed;
 
-    //direction.x += gameTime * 0.15;
-    string inputOutputText = "Triggered input from AS and fetched a String! Number: ";
-    //DrawLineNormalized(Vec2(0), Vec2(0.5));
-    //DrawLineNormalizedScreenAlligned(Vec2(0.5), (direction * 0.5) + 0.5);
-    //DrawCircleNormalized(playerPosition, 0.05);
-    int numberFromAFunction = GetAMathematicalNumber(gameTime);
-
-    inputOutputText += numberFromAFunction;
-    inputOutputText += '!';
+    DrawCircle(playerPosition, 5.015);
 
     if (GetButtonInput(eInputAction::PlayerAction1, 0) == 1)
     {
         savedPositions.Add(playerPosition);
+
+        string inputOutputText = "Player position = x : ";
+        inputOutputText += playerPosition.x;
+        inputOutputText += " y : ";
+        inputOutputText += playerPosition.y;
         Print(inputOutputText);
     }
 
-    for (uint i = 0; i < savedPositions.Count(); i++)
+    for (uint i = 0; i < savedPositions.Size(); i++)
     {
-        DrawCircleNormalized(savedPositions[i], 0.005);
+        DrawCircle(savedPositions[i], 10.005);
     }
 
+    if (TestClass.IsInside(playerPosition))
+    {
+        TestClass.MoveAround();
+    }
+
+    TestClass.ShowPosition();
 }

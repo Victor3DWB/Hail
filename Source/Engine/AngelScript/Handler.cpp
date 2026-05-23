@@ -58,132 +58,132 @@ namespace
 		return "";
 	}
 
-	Vec2 localGetDirectionInput(eInputAction actionToGet, int gamepadToCheck)
+	static Vec2 localGetDirectionInput(eInputAction actionToGet, int gamepadToCheck)
 	{
 		const glm::vec2 direction = g_pInputActionMap->GetDirectionInput(actionToGet, gamepadToCheck);
 		return Vec2(direction);
 	}
-	int localGetButtonInput(eInputAction actionToGet, int gamepadToCheck)
+	static int localGetButtonInput(eInputAction actionToGet, int gamepadToCheck)
 	{
 		return (int)g_pInputActionMap->GetButtonInput(actionToGet, gamepadToCheck);
 	}
-	float localGetGamepadTriggerInput(eInputAction actionToGet, int gamepadToCheck)
+	static float localGetGamepadTriggerInput(eInputAction actionToGet, int gamepadToCheck)
 	{
 		return g_pInputActionMap->GetGamepadTriggerInput(actionToGet, gamepadToCheck);
 	}
 
 	//TODO: replace with cusotm string class
-	void localPrint(std::string& stringToPrint)
+	static void localPrint(std::string& stringToPrint)
 	{
 		H_DEBUGMESSAGE(stringToPrint.c_str());
 	}
-	void localPrintError(std::string& stringToPrint)
+	static void localPrintError(std::string& stringToPrint)
 	{
 		H_ERROR(stringToPrint.c_str());
 	}
-	void localPrintWarning(std::string& stringToPrint)
+	static void localPrintWarning(std::string& stringToPrint)
 	{
 		H_WARNING(stringToPrint.c_str());
 	}
 
 	// All non normalized functions work in pixel coordinates.
 	//TODO: Add a color type to AngelScript
-	void localDrawLineNormalized(const Vec2& startPos, const Vec2& endPos)
+	static void localDrawLineNormalized(const Vec2& startPos, const Vec2& endPos)
 	{
 		DrawLine2D(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, startPos.m_vec, endPos.m_vec, true);
 	}
 
-	void localDrawLineNormalizedScreenAlligned(const Vec2& startPos, const Vec2& endPos)
+	static void localDrawLineNormalizedScreenAlligned(const Vec2& startPos, const Vec2& endPos)
 	{
 		DrawLine2D(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, startPos.m_vec, endPos.m_vec, false);
 	}
 
-	void localDrawLine(const Vec2& startPos, const Vec2& endPos)
+	static void localDrawLine(const Vec2& startPos, const Vec2& endPos)
 	{
 		DrawLine2DPixelSpace(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, startPos.m_vec, endPos.m_vec, true);
 	}
 
-	void localDrawLineScreenAlligned(const Vec2& startPos, const Vec2& endPos)
+	static void localDrawLineScreenAlligned(const Vec2& startPos, const Vec2& endPos)
 	{
 		DrawLine2DPixelSpace(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, startPos.m_vec, endPos.m_vec, false);
 	}
 
-	void localDrawLineNormalizedRotLength(const Vec2& startPos, float rotationRadian, float length)
+	static void localDrawLineNormalizedRotLength(const Vec2& startPos, float rotationRadian, float length)
 	{
 		DrawLine2D(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, startPos.m_vec, rotationRadian, length, true);
 	}
 
-	void localDrawLineNormalizedRotLengthScreenAlligned(const Vec2& startPos, float rotationRadian, float length)
+	static void localDrawLineNormalizedRotLengthScreenAlligned(const Vec2& startPos, float rotationRadian, float length)
 	{
 		DrawLine2D(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, startPos.m_vec, rotationRadian, length, false);
 	}
 
-	void localDrawLineRotLength(const Vec2& startPos, float rotationRadian, float length)
+	static void localDrawLineRotLength(const Vec2& startPos, float rotationRadian, float length)
 	{
 		DrawLine2DPixelSpace(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, startPos.m_vec, rotationRadian, length, true);
 	}
 
-	void localDrawLineRotLengthScreenAlligned(const Vec2& startPos, float rotationRadian, float length)
+	static void localDrawLineRotLengthScreenAlligned(const Vec2& startPos, float rotationRadian, float length)
 	{
 		DrawLine2DPixelSpace(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, startPos.m_vec, rotationRadian, length, false);
 	}
 
-	void localDrawBoxNormalized(const Vec2& pos, const Vec2& dimensions)
+	static void localDrawBoxNormalized(const Vec2& pos, const Vec2& dimensions)
 	{
 		DrawBox2D(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, pos.m_vec, dimensions.m_vec, true);
 	}
 
-	void localDrawBoxNormalizedScreenAlligned(const Vec2& pos, const Vec2& dimensions)
+	static void localDrawBoxNormalizedScreenAlligned(const Vec2& pos, const Vec2& dimensions)
 	{
 		DrawBox2D(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, pos.m_vec, dimensions.m_vec, false);
 	}
 
-	void localDrawBox(const Vec2& pos, const Vec2& dimensions)
+	static void localDrawBox(const Vec2& pos, const Vec2& dimensions)
 	{
 		DrawBox2DPixelSpace(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, pos.m_vec, dimensions.m_vec, true);
 	}
 
-	void localDrawBoxScreenAlligned(const Vec2& pos, const Vec2& dimensions)
+	static void localDrawBoxScreenAlligned(const Vec2& pos, const Vec2& dimensions)
 	{
 		DrawBox2DPixelSpace(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, pos.m_vec, dimensions.m_vec, false);
 	}
 
-	void localDrawBoxMinMaxNormalized(const Vec2& min, const Vec2& max)
+	static void localDrawBoxMinMaxNormalized(const Vec2& min, const Vec2& max)
 	{
 		DrawRect2D(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, min.m_vec, max.m_vec, true);
 	}
 
-	void localDrawBoxMinMaxNormalizedScreenAlligned(const Vec2& min, const Vec2& max)
+	static void localDrawBoxMinMaxNormalizedScreenAlligned(const Vec2& min, const Vec2& max)
 	{
 		DrawRect2D(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, min.m_vec, max.m_vec, false);
 	}
 
-	void localDrawBoxMinMax(const Vec2& min, const Vec2& max)
+	static void localDrawBoxMinMax(const Vec2& min, const Vec2& max)
 	{
 		DrawRect2DPixelSpace(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, min.m_vec, max.m_vec, true);
 	}
 
-	void localDrawBoxMinMaxScreenAlligned(const Vec2& min, const Vec2& max)
+	static void localDrawBoxMinMaxScreenAlligned(const Vec2& min, const Vec2& max)
 	{
 		DrawRect2DPixelSpace(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, min.m_vec, max.m_vec, false);
 	}
 
-	void localDrawCircleNormalized(const Vec2& pos, float radius)
+	static void localDrawCircleNormalized(const Vec2& pos, float radius)
 	{
 		DrawCircle2D(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, pos.m_vec, radius, true);
 	}
 
-	void localDrawCircleNormalizedScreenAlligned(const Vec2& pos, float radius)
+	static void localDrawCircleNormalizedScreenAlligned(const Vec2& pos, float radius)
 	{
 		DrawCircle2D(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, pos.m_vec, radius, false);
 	}
 
-	void localDrawCircle(const Vec2& pos, float radius)
+	static void localDrawCircle(const Vec2& pos, float radius)
 	{
 		DrawCircle2DPixelSpace(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, pos.m_vec, radius, true);
 	}
 
-	void localDrawCircleScreenAlligned(const Vec2& pos, float radius)
+	static void localDrawCircleScreenAlligned(const Vec2& pos, float radius)
 	{
 		DrawCircle2DPixelSpace(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, pos.m_vec, radius, false);
 	}
@@ -281,6 +281,10 @@ static void Vec2DefaultConstructor(Vec2* self)
 	new(self) Vec2();
 }
 
+void Vec2DefaultDestructor(Vec2* /*thisPtr*/)
+{
+}
+
 static void Vec2CopyConstructor(const Vec2& other, Vec2* self)
 {
 	new(self) Vec2(other);
@@ -301,6 +305,7 @@ static void Vec2ListConstructor(float* list, Vec2* self)
 	new(self) Vec2(list[0], list[1]);
 }
 
+
 void Hail::AngelScript::Handler::RegisterAngelScriptVectorType()
 {
 	int r;
@@ -308,21 +313,24 @@ void Hail::AngelScript::Handler::RegisterAngelScriptVectorType()
 
 	// Register the type
 	
-	r = m_pTypeRegistry->RegisterType("Vec2", sizeof(Vec2), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_CAK | asOBJ_APP_CLASS_ALLFLOATS, H_FILE_LINE); assert(r >= 0);
+	r = m_pTypeRegistry->RegisterType("Vec2", sizeof(Vec2), asOBJ_VALUE | asOBJ_APP_CLASS_CAK | asOBJ_APP_CLASS_ALLFLOATS, H_FILE_LINE); assert(r >= 0);
 	r = m_pTypeRegistry->RegisterVariableFunction("Vec2", &GetVec2VariableData); assert(r >= 0);
 	bool bResult;
+
+	// Register the constructors
+	bResult = m_pTypeRegistry->RegisterClassConstructor("Vec2", {}, {}, asFUNCTION(Vec2DefaultConstructor), true, H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Vec2 func");
+	bResult = m_pTypeRegistry->RegisterClassConstructor("Vec2", {}, {}, asFUNCTION(Vec2DefaultDestructor), false, H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Vec2 func");
+	bResult = m_pTypeRegistry->RegisterClassConstructor("Vec2", { { "in", "Vec2", true, true } }, {}, asFUNCTION(Vec2CopyConstructor), true, H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Vec2 func");
+	bResult = m_pTypeRegistry->RegisterClassConstructor("Vec2", { { "", "float" } }, {}, asFUNCTION(Vec2ConvConstructor), true, H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Vec2 func");
+	bResult = m_pTypeRegistry->RegisterClassConstructor("Vec2", { { "", "float" }, { "", "float" } }, {}, asFUNCTION(Vec2InitConstructor), true, H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Vec2 func");
+	bResult = m_pTypeRegistry->RegisterClassConstructor("Vec2", { { "in", "int", true, true } }, { { "", "float" }, { "", "float" } }, asFUNCTION(Vec2ListConstructor), true, H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Vec2 func");
+
 	// Register the object properties
 	bResult = m_pTypeRegistry->RegisterClassObjectMember("Vec2", { "x", "float" }, asOFFSET(Vec2, m_vec.x), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Vec2 func");
 	bResult = m_pTypeRegistry->RegisterClassObjectMember("Vec2", { "y", "float" }, asOFFSET(Vec2, m_vec.y), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Vec2 func");
 
-	// Register the constructors
-	bResult = m_pTypeRegistry->RegisterClassConstructor("Vec2", {}, {}, asFUNCTION(Vec2DefaultConstructor), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Vec2 func");
-	bResult = m_pTypeRegistry->RegisterClassConstructor("Vec2", { { "in", "Vec2", true, true } }, {}, asFUNCTION(Vec2CopyConstructor), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Vec2 func");
-	bResult = m_pTypeRegistry->RegisterClassConstructor("Vec2", { { "", "float" } }, {}, asFUNCTION(Vec2ConvConstructor), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Vec2 func");
-	bResult = m_pTypeRegistry->RegisterClassConstructor("Vec2", { { "", "float" }, { "", "float" } }, {}, asFUNCTION(Vec2InitConstructor), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Vec2 func");
-	bResult = m_pTypeRegistry->RegisterClassConstructor("Vec2", { { "in", "int", true, true } }, { { "", "float" }, { "", "float" } }, asFUNCTION(Vec2ListConstructor), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Vec2 func");
-
 	// Register the operator overloads
+	bResult = m_pTypeRegistry->RegisterClassOperatorOverload("Vec2", { "opAssign", "Vec2", false, true }, asMETHODPR(Vec2, operator=, (const Vec2&), Vec2&), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Vec2 func");
 	bResult = m_pTypeRegistry->RegisterClassOperatorOverload("Vec2", { "opAddAssign", "Vec2", false, true }, asMETHODPR(Vec2, operator+=, (const Vec2&), Vec2&), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Vec2 func");
 	bResult = m_pTypeRegistry->RegisterClassOperatorOverload("Vec2", { "opSubAssign", "Vec2", false, true }, asMETHODPR(Vec2, operator-=, (const Vec2&), Vec2&), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Vec2 func");
 	bResult = m_pTypeRegistry->RegisterClassOperatorOverload("Vec2", { "opMulAssign", "Vec2", false, true }, asMETHODPR(Vec2, operator*=, (const Vec2&), Vec2&), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Vec2 func");
@@ -336,7 +344,7 @@ void Hail::AngelScript::Handler::RegisterAngelScriptVectorType()
 	// Register the object methods
 	bResult = m_pTypeRegistry->RegisterClassMethod("Vec2", { "Length", "float", true }, {}, asMETHOD(Vec2, Length), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Vec2 func");
 	bResult = m_pTypeRegistry->RegisterClassMethod("Vec2", { "SquaredLength", "float", true }, {}, asMETHOD(Vec2, SquaredLength), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Vec2 func");
-	bResult = m_pTypeRegistry->RegisterClassMethod("Vec2", { "GetNormalized", "float", true }, {}, asMETHOD(Vec2, GetNormalized), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Vec2 func");
+	bResult = m_pTypeRegistry->RegisterClassMethod("Vec2", { "GetNormalized", "Vec2", true }, {}, asMETHOD(Vec2, GetNormalized), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Vec2 func");
 	bResult = m_pTypeRegistry->RegisterClassMethod("Vec2", { "Normalize", "void" }, {}, asMETHOD(Vec2, Normalize), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Vec2 func");
 
 	// Register the swizzle operators
@@ -401,13 +409,21 @@ float Hail::AngelScript::Vec2::SquaredLength() const
 
 Vec2 Hail::AngelScript::Vec2::GetNormalized() const
 {
-	const glm::vec2 vec2 = glm::normalize(m_vec);
-	return Vec2(vec2.x, vec2.y);
+	Vec2 returnVector{};
+	if (m_vec.x != 0.0 && m_vec.y != 0.0)
+	{
+		const glm::vec2 vec2 = glm::normalize(m_vec);
+		returnVector = Vec2(vec2.x, vec2.y);
+	}
+	return returnVector;
 }
 
 void Hail::AngelScript::Vec2::Normalize()
 {
-	m_vec = glm::normalize(m_vec);
+	if (m_vec.x != 0.0 || m_vec.y != 0.0)
+	{
+		m_vec = glm::normalize(m_vec);
+	}
 }
 
 bool Hail::AngelScript::Vec2::operator==(const Vec2& other) const

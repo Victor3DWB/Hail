@@ -996,12 +996,9 @@ void Hail::AngelScript::DebuggerServer::RequestBuildErrors(MessageHeader header)
 
 void Hail::AngelScript::DebuggerServer::RequestEngineTypes(MessageHeader header)
 {
-    if (m_pActiveScript)
-    {
-        H_ASSERT(header.type == eDebuggerMessageType::RequestEngineTypes);
-        H_DEBUGMESSAGE("Requested engine types");
-        m_returnRequests.Add(header);
-    }
+    H_ASSERT(header.type == eDebuggerMessageType::RequestEngineTypes);
+    H_DEBUGMESSAGE("Requested engine types");
+    m_returnRequests.Add(header);
 }
 
 void Hail::AngelScript::DebuggerServer::AddBuildError(const BuildErrorInfo& buildError)

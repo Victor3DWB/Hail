@@ -42,8 +42,8 @@ namespace Hail
 		callback_function_totalTime_dt_frmData updateFunctionToCall = nullptr;
 		callback_function shutdownFunctionToCall = nullptr;
 
-		eResolutions startupWindowResolution = eResolutions::res720;
-		eResolutions renderTargetResolution = eResolutions::res720;
+		eResolutions startupWindowResolution = eResolutions::res1080;
+		eResolutions renderTargetResolution = eResolutions::res1080;
 
 		uint16_t startPositionX = 400;
 		uint16_t startPositionY = 400;

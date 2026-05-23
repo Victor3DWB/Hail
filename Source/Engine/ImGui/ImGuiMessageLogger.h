@@ -13,10 +13,10 @@ namespace Hail
 	{
 	public:
 
-
 		ImGuiMessageLogger();
 
 		void RenderImGuiCommands();
+		void FillAndSortMessageList(bool bUpdateMessageList);
 
 	private:
 		enum class eMessageSortingType : uint8
@@ -31,7 +31,6 @@ namespace Hail
 
 
 		void DrawMessageLog();
-		void FillAndSortMessageList(bool bUpdateMessageList);
 
 
 		eMessageLogType m_logType;

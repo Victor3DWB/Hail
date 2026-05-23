@@ -73,14 +73,17 @@ Hail::StringL::StringL(StringL&& moveableString)
 	m_memory.m_p = nullptr;
 	m_length = moveableString.m_length;
 	m_allocatedLength = moveableString.m_allocatedLength;
-	if (moveableString.m_allocatedLength > 15)
+	if (moveableString.m_length > 0)
 	{
-		m_memory.m_p = moveableString.m_memory.m_p;
-		moveableString.m_memory.m_p = nullptr;
-	}
-	else
-	{
-		strcpy_s(m_memory.m_shortString, moveableString.m_memory.m_shortString);
+		if (moveableString.m_allocatedLength > 15)
+		{
+			m_memory.m_p = moveableString.m_memory.m_p;
+			moveableString.m_memory.m_p = nullptr;
+		}
+		else
+		{
+			strcpy_s(m_memory.m_shortString, moveableString.m_memory.m_shortString);
+		}
 	}
 	moveableString.m_length = 0;
 	moveableString.m_allocatedLength = 0;
@@ -342,6 +345,7 @@ StringL& Hail::StringL::operator+=(StringL& anotherString)
 			char* previousString = m_memory.m_p;
 			StringMemoryAllocator::GetInstance().AllocateString(previousString, newLength, &m_memory.m_p);
 			m_allocatedLength = newLength;
+			StringMemoryAllocator::GetInstance().DeallocateString(&previousString);
 		}
 
 		memcpy(m_memory.m_p + (previousLength), anotherString.Data(), anotherString.m_length);
@@ -504,12 +508,12 @@ StringL Hail::StringL::operator+(const StringL& string1)
 
 char* Hail::StringL::Data()
 {
-	return m_length > 15u ? m_memory.m_p : m_memory.m_shortString;
+	return m_allocatedLength > 0u ? m_memory.m_p : m_memory.m_shortString;
 }
 
 const char* const Hail::StringL::Data() const
 {
-	return m_length > 15u ? m_memory.m_p : m_memory.m_shortString;
+	return m_allocatedLength > 0u ? m_memory.m_p : m_memory.m_shortString;
 }
 
 void Hail::StringL::Reserve(uint32 numOfChars)
@@ -932,102 +936,124 @@ StringLW& Hail::StringLW::operator=(const wchar_t* const pWString)
 StringLW& Hail::StringLW::operator+=(StringLW& anotherString)
 {
 	const uint32 previousLength = Length();
-	m_length = previousLength + anotherString.Length();
-	if (m_length > 7)
-	{
-		const wchar_t* previousString = m_memory.m_p;
-		if (m_length > m_allocatedLength)
-		{
-			if (m_allocatedLength > 15)
-				StringMemoryAllocator::GetInstance().DeallocateString(&m_memory.m_p);
+	const uint32 newLength = previousLength + anotherString.Length();
 
-			StringMemoryAllocator::GetInstance().AllocateString(nullptr, m_length, &m_memory.m_p);
-			m_allocatedLength = m_length;
+	if (m_allocatedLength > 0)
+	{
+		if (newLength > m_allocatedLength)
+		{
+			wchar_t* previousString = m_memory.m_p;
+			StringMemoryAllocator::GetInstance().AllocateString(previousString, newLength, &m_memory.m_p);
+			m_allocatedLength = newLength;
+			StringMemoryAllocator::GetInstance().DeallocateString(&previousString);
 		}
 
-		memcpy(m_memory.m_p, previousString, previousLength * sizeof(wchar_t));
-		memcpy(m_memory.m_p + (previousLength), anotherString.m_memory.m_p, anotherString.m_length * sizeof(wchar_t));
-		m_memory.m_p[m_length] = 0;
+		memcpy(m_memory.m_p + (previousLength), anotherString.Data(), anotherString.m_length * sizeof(wchar_t));
+		m_memory.m_p[newLength] = 0;
 	}
 	else
 	{
-		if (m_allocatedLength > 7)
+		if (newLength > 7)
 		{
-			StringMemoryAllocator::GetInstance().DeallocateString(&m_memory.m_p);
+			wchar_t previousString[8];
+			memcpy(previousString, m_memory.m_shortString, previousLength * sizeof(wchar_t));
+			StringMemoryAllocator::GetInstance().AllocateString(nullptr, newLength, &m_memory.m_p);
+			m_allocatedLength = newLength;
+			memcpy(m_memory.m_p, previousString, previousLength * sizeof(wchar_t));
+			memcpy(m_memory.m_p + (previousLength), anotherString.Data(), anotherString.m_length * sizeof(wchar_t));
+			m_memory.m_p[newLength] = 0;
 		}
-		memcpy(&m_memory.m_shortString[previousLength], anotherString.m_memory.m_shortString, anotherString.Length() * sizeof(wchar_t));
-		m_memory.m_shortString[m_length] = 0;
-		m_allocatedLength = 0;
+		else
+		{
+			memcpy(&m_memory.m_shortString[previousLength], anotherString.m_memory.m_shortString, anotherString.Length() * sizeof(wchar_t));
+			m_memory.m_shortString[newLength] = 0;
+		}
 	}
+	m_length = newLength;
 
 	return *this;
 }
 
 StringLW& Hail::StringLW::operator+=(const char* pString)
 {
-	const uint32 previousLength = Length();
+	const uint32 previousLength = m_length;
 	const uint32 newStringLength = StringLength(pString);
-	m_length = Length() + newStringLength;
-	if (m_length > 7)
+	const uint32 newLength = newStringLength + previousLength;
+	if (m_allocatedLength > 0)
 	{
-		const wchar_t* previousString = m_allocatedLength > 7 ? m_memory.m_p : m_memory.m_shortString;
-		if (m_length > m_allocatedLength)
+		if (newLength > m_allocatedLength)
 		{
-			if (m_allocatedLength > 7)
-				StringMemoryAllocator::GetInstance().DeallocateString(&m_memory.m_p);
-
-			StringMemoryAllocator::GetInstance().AllocateString(nullptr, m_length, &m_memory.m_p);
-			m_allocatedLength = m_length;
+			wchar_t* previousString = m_memory.m_p;
+			StringMemoryAllocator::GetInstance().AllocateString(previousString, newLength, &m_memory.m_p);
+			m_allocatedLength = newLength;
+			StringMemoryAllocator::GetInstance().DeallocateString(&previousString);
 		}
-		memcpy(m_memory.m_p, previousString, previousLength * sizeof(wchar_t));
+
 		FromConstCharToWChar(pString, m_memory.m_p + (previousLength), newStringLength);
-		m_memory.m_p[m_length] = 0;
+		m_memory.m_p[newLength] = 0;
 	}
 	else
 	{
-		if (m_allocatedLength > 7)
+		if (newLength > 7)
 		{
-			StringMemoryAllocator::GetInstance().DeallocateString(&m_memory.m_p);
-			m_allocatedLength = 0;
+			wchar_t previousString[8];
+			memcpy(previousString, m_memory.m_shortString, previousLength * sizeof(wchar_t));
+			StringMemoryAllocator::GetInstance().AllocateString(nullptr, newLength, &m_memory.m_p);
+			m_allocatedLength = newLength;
+			memcpy(m_memory.m_p, previousString, previousLength * sizeof(wchar_t));
+			FromConstCharToWChar(pString, m_memory.m_shortString + (previousLength), newStringLength);
+			m_memory.m_p[newLength] = 0;
 		}
-		FromConstCharToWChar(pString, m_memory.m_shortString + (previousLength), newStringLength);
+		else
+		{
+			FromConstCharToWChar(pString, m_memory.m_shortString + (previousLength), newStringLength);
+			m_memory.m_shortString[newLength] = 0;
+		}
+
 		m_memory.m_shortString[m_length] = 0;
 	}
+	m_length = newLength;
 
 	return *this;
 }
 
 StringLW& Hail::StringLW::operator+=(const wchar_t* pWString)
 {
-	const uint32 previousLength = Length();
+	const uint32 previousLength = m_length;
 	const uint32 newStringLength = StringLength(pWString);
-	m_length = Length() + newStringLength;
-	if (m_length > 7)
+	const uint32 newLength = newStringLength + previousLength;
+	if (m_allocatedLength > 0)
 	{
-		const wchar_t* previousString = m_allocatedLength > 7 ? m_memory.m_p : m_memory.m_shortString;
-		if (m_length > m_allocatedLength)
+		if (newLength > m_allocatedLength)
 		{
-			if (m_allocatedLength > 7)
-				StringMemoryAllocator::GetInstance().DeallocateString(&m_memory.m_p);
-
-			StringMemoryAllocator::GetInstance().AllocateString(nullptr, m_length, &m_memory.m_p);
-			m_allocatedLength = m_length;
+			wchar_t* previousString = m_memory.m_p;
+			StringMemoryAllocator::GetInstance().AllocateString(previousString, newLength, &m_memory.m_p);
+			m_allocatedLength = newLength;
+			StringMemoryAllocator::GetInstance().DeallocateString(&previousString);
 		}
 
-		memcpy(m_memory.m_p, previousString, previousLength * sizeof(wchar_t));
 		memcpy(m_memory.m_p + (previousLength), pWString, newStringLength * sizeof(wchar_t));
-		m_memory.m_p[m_length] = 0;
+		m_memory.m_p[newLength] = 0;
 	}
 	else
 	{
-		if (m_allocatedLength > 7)
+		if (newLength > 7)
 		{
-			StringMemoryAllocator::GetInstance().DeallocateString(&m_memory.m_p);
-			m_allocatedLength = 0;
+			wchar_t previousString[8];
+			memcpy(previousString, m_memory.m_shortString, previousLength * sizeof(wchar_t));
+			StringMemoryAllocator::GetInstance().AllocateString(nullptr, newLength, &m_memory.m_p);
+			m_allocatedLength = newLength;
+			memcpy(m_memory.m_p, previousString, previousLength * sizeof(wchar_t));
+			memcpy(m_memory.m_p + (previousLength), pWString, newStringLength * sizeof(wchar_t));
+			m_memory.m_p[newLength] = 0;
 		}
-		memcpy(&m_memory.m_shortString[previousLength], pWString, newStringLength * sizeof(wchar_t));
-		m_memory.m_shortString[m_length] = 0;
+		else
+		{
+			memcpy(&m_memory.m_shortString[previousLength], pWString, newStringLength * sizeof(wchar_t));
+			m_memory.m_shortString[newLength] = 0;
+		}
 	}
+	m_length = newLength;
 
 	return *this;
 }

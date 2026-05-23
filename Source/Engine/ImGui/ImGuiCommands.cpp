@@ -573,6 +573,7 @@ void Hail::ImGuiCommandManager::RenderEngineImgui(RenderContext* pRenderContext)
 	}
 
 	ImGui::PopStyleVar();
+	g_messageLogger.FillAndSortMessageList(false);
 }
 
 void Hail::ImGuiCommandManager::PopStackType(ImGuiCommandRecorder::IMGUI_TYPES referenceTypeToPop)

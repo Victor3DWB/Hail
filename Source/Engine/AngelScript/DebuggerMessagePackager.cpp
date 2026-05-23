@@ -197,10 +197,10 @@ namespace WriteMessages
 		return header;
 	}
 
-	uint32 EncodeString(MessageData& memoryToFill, const StringL& stringToEncode)
+	uint32 EncodeString(MessageData& memoryToFill, const StringL& stringToEncode, uint16 stringLengthOverride = MAX_UINT16)
 	{
 		uint32 offsetMoved = 0;
-		uint16 stringLength = stringToEncode.Length();
+		uint16 stringLength = stringLengthOverride == MAX_UINT16 ? stringToEncode.Length() : stringLengthOverride;
 		memoryToFill.FillMessageBuffer(&stringLength, sizeof(stringLength));
 		offsetMoved += sizeof(stringLength);
 		memoryToFill.FillMessageBuffer((void*)stringToEncode.Data(), sizeof(char) * stringLength);
@@ -376,7 +376,15 @@ DebuggerMessage Hail::AngelScript::CreateEngineTypeResponseMessage(const Message
 	for (uint32 iClass = 0; iClass < registeredGlobalClasses.Size(); iClass++)
 	{
 		const TypeDebuggerRegistry::Class& registeredClass = registeredGlobalClasses[iClass];
-		bufferOffset += WriteMessages::EncodeString(message.m_data, registeredClass.m_name.Data());
+		// Remove template type names
+		if (int endIndex = StringContainsAndEndsAtIndex(registeredClass.m_name.Data(), "<T>"))
+		{
+			bufferOffset += WriteMessages::EncodeString(message.m_data, registeredClass.m_name.Data(), endIndex);
+		}
+		else
+		{
+			bufferOffset += WriteMessages::EncodeString(message.m_data, registeredClass.m_name.Data());
+		}
 		WriteMessages::EncodeBaseType(message.m_data, bufferOffset, registeredClass.m_line);
 		bufferOffset += WriteMessages::EncodeString(message.m_data, registeredClass.m_owningFile.Data());
 		WriteMessages::EncodeBaseType(message.m_data, bufferOffset, (uint32)registeredClass.m_variables.Size());
