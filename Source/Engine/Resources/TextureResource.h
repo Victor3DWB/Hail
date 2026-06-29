@@ -26,7 +26,7 @@ namespace Hail
 		virtual uint32 GetCurrentStageUsage() = 0;
 		bool Init(RenderingDevice* pDevice);
 
-		String64 textureName;
+		StringL textureName;
 		uint32_t m_index = MAX_UINT;
 		CompiledTexture m_compiledTextureData;
 		TextureProperties m_properties;

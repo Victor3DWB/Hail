@@ -269,7 +269,7 @@ TextureResource* Hail::TextureManager::LoadTextureRequestInternal(const FilePath
 	TextureWithView textureAndView{};
 	if (compiledTextureData.loadState == TEXTURE_LOADSTATE::LOADED_TO_RAM)
 	{
-		const char* pTextureName = path.Object().Name().CharString();
+		const char* pTextureName = path.Object().Name().ToCharString();
 		textureAndView.m_pTexture= CreateTextureInternalNoLoad();
 		textureAndView.m_pTexture->textureName = pTextureName;
 		textureAndView.m_pTexture->m_metaResource = metaData;
@@ -553,7 +553,7 @@ FilePath Hail::TextureManager::ImportTextureResource(const FilePath& filepath) c
 		GetResourceRegistry().AddToRegistry(projectPath, ResourceType::Texture);
 	else
 	{
-		H_ERROR(StringL::Format("Failed to load texture: %s", filepath.Object().Name().CharString()));
+		H_ERROR(StringL::Format("Failed to load texture: %s", filepath.Object().Name().ToCharString()));
 	}
 	return projectPath;
 }

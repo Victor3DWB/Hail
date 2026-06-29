@@ -19,20 +19,25 @@
 - [x] Crash logger and send out a build for testing. 
 
 ---------------
+# TODO list:
 
 - [x] Look over the Frame In Flight fences as the tutroial I followed was wrong. 
 - [x] Look over all resources that are using frame in flight and remove uneccessary uses. 
 - [x] Fix include hierarchy so I do not need "../../Engine_ResourceHandling/ResourceCommon.h" in rendering code. 
 - [x] Angelscript, implement the language server protocol for SyntaxHighlighting in VS-Code.
 - [x] Angelscript, send error messages on Angelscript compilation fail and Engine registered resources.
-- [] Angelscript, replace std::string with our own string class, register arrays and string to the type registry.
+- [x] AngelScript creates a Capability base class.
+- [] Hook up Tick-Graph with created capabilities.
+- [] Create a ECS or GO structure to manage Capabilities and GamePlay systems.
+- [] Hook up ImGui with functionPtrs from Gamethread instead of HandMade registry.
+- [] Angelscript, replace std::string with our own string class, register string to the type registry.
+- [] Angelscript, improve hot reloading and make hotreloading when changing dependency files.
 - [] Create a pipeline to create sprites render commands from AngelScript.
 - [] Fix broken reloading of GPU resources and then remake hot reloading.
 - [] Shader include gets updated, update all shaders that depends on it, so shader dependency tracking. 
 - [] Improve RadixSort to use a proper reduction for the shuffle step. 
 
-
-# TODO list:
+### Unsorted tasks
 
 - [] Memory allocators & memory pool (check out the Arena memory allocator strategy).
 - [] Red-black tree and hashmap.
@@ -61,13 +66,10 @@
 - [x] Implement VMA on the Vulkan backend.
 - [x] VMA implement texture support.
 - [x] Angelscript, implement array.
-- [] Angelscript, replace std::string with our own string class.
 - [x] Angelscript, add debugging support in VS code.
 - [x] Angelscript, implement the input handler and debug commands to the scripts.
 - [x] Angelscript, implement the language server protocol for SyntaxHighlighting in VS-Code.
 - [x] Angelscript, send error messages on Angelscript compilation fail and Engine registered resources.
-- [] Angelscript, improve hot reloading and make hotreloading when changing dependency files.
-- [] Fix broken reloading of GPU resources and then remake hot reloading.
 - [x] Context upload once function.
 - [x] Context, move over rendering and state functions to the context.
 - [x] Depth Sorting of sprite and text commands.
@@ -75,12 +77,14 @@
 - [] Shader include gets updated, update all shaders that depends on it. 
 - [] Bindless resources.
 - [] RawInput instead of Windows input.
-- [] Input queue to make input more predictable.
-- [] Create a pipeline to create sprites render commands from AngelScript.
-- [] Design and decide over game Objects and level structure.
 - [] When program is out of focus, do not record any input and yield threads to the OS.
-- [] Improved system diagnostics and error handling for builds.
+
+### Quality of life tasks
+
+- [] Replace in FileObject the WString256 with a StringLW.
+- [] Input queue to make input more predictable.
 - [] Configure more startup attributes through command args, like Asserting, ImGui and ErrorHandling.
+- [] Improved system diagnostics and error handling for builds.
 
 ## Important Notes
 Create a seperate Command Pool for short lived commands, as well as a transfer Queue only for transfer commands on the GPU.

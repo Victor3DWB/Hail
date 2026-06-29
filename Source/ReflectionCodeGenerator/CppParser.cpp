@@ -496,7 +496,7 @@ void Hail::ParseAndGenerateCodeForProjects(const char* projectToParse)
 			const FilePath currentPath = iterator->GetCurrentPath();
 			const FileObject currentObject = currentPath.Object();
 
-			String64 extension = currentObject.Extension().CharString();
+			String64 extension = currentObject.Extension().ToCharString();
 			if (!StringContains("h", extension.Data()) || !StringContains("hpp", extension.Data()))
 			{
 				continue;

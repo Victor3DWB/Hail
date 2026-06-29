@@ -70,7 +70,7 @@ void VlkFrameBufferTexture::CreateTextureResources(bool bIsColorTexture, Renderi
 	for (size_t i = 0; i < MAX_FRAMESINFLIGHT; i++)
 	{
 		VlkTextureResource* vlkTextureResource = new VlkTextureResource();
-		vlkTextureResource->textureName = m_bufferName;
+		vlkTextureResource->textureName = m_bufferName.Data();
 		if (bIsColorTexture)
 		{
 			props.depthFormat = TEXTURE_DEPTH_FORMAT::UNDEFINED;

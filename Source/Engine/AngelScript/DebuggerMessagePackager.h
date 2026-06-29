@@ -63,7 +63,7 @@ namespace Hail
 		DebuggerMessage CreateVariablesMessage(const GrowingArray<Variable>* variableScopeToSend);
 		DebuggerMessage CreateVariableMessage(const Variable* variableToSend);
 		DebuggerMessage CreateBuildErrorMessage(const MessageHeader& header, const GrowingArray<BuildErrorInfo>& buildErrorsToSend);
-		DebuggerMessage CreateEngineTypeResponseMessage(const MessageHeader& header, TypeDebuggerRegistry* pTypeDebuggerRegistry);
+		DebuggerMessage CreateEngineTypeResponseMessage(const MessageHeader& header, TypeDebuggerRegistry* pTypeDebuggerRegistry, const GrowingArray<const char*>& mandatoryIncludePaths);
 		DebuggerMessage CreateStopExecutionMessage();
 
 		void HandleDebuggerMessage(DebuggerServer* pDebugger, uint32 messageLength, void* messageStream);

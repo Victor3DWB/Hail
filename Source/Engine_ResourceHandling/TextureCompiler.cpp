@@ -65,7 +65,7 @@ FilePath ExportCompiled32BitTexture(const FilePath& originalTexturePath, uint32_
 
 FilePath TextureCompiler::CompileSpecificTGATexture(const FilePath& filePath, GUID guid)
 {
-	String64 extension = filePath.Object().Extension().CharString();
+	String64 extension = filePath.Object().Extension().ToCharString();
 	H_ASSERT(StringCompare(extension,"tga") || StringCompare(extension, "tga"));
 	TGAHEADER tgaHeader;
 	InOutStream tgaFile;

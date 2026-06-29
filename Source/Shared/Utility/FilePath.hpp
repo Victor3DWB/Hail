@@ -41,8 +41,8 @@ namespace Hail
 		bool operator==(const FileObject& a) const;
 		bool operator!=(const FileObject& a) const;
 
-		const WString64& Name() const { return m_name; }
-		const WString64& ParentName() const { return m_parentName; }
+		const WString256& Name() const { return m_name; }
+		const WString256& ParentName() const { return m_parentName; }
 		const WString64& Extension() const { return m_extension; }
 		void SetExtension(WString64 newExtension);
 		bool IsDirectory() const { return m_isDirectory; }
@@ -59,8 +59,8 @@ namespace Hail
 		void FindExtension();
 		friend class FilePath;
 
-		WString64 m_name;
-		WString64 m_parentName;
+		WString256 m_name;
+		WString256 m_parentName;
 		WString64 m_extension;
 		CommonFileData m_fileData;
 		bool m_isDirectory;
@@ -295,7 +295,7 @@ namespace Hail
 		bool Empty() const { return m_pathLength == 0; }
 		void Serialize(InOutStream& outObject) override;
 		void Deserialize(InOutStream& inObject) override;
-		String64 GetName() const { return m_name; }
+		StringL GetName() const { return m_name; }
 	private:
 		int16 m_stepsFromFileToCommonSharedDir;
 		uint16 m_directoryLevel;
@@ -303,6 +303,6 @@ namespace Hail
 
 		wchar_t m_pathFromWorkingDir[MAX_FILE_LENGTH];
 		uint16 m_pathLength;
-		String64 m_name;
+		StringL m_name;
 	};
 }

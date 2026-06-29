@@ -4,6 +4,8 @@
 #include "Input\InputHandler.h"
 #include "Input\InputActionMap.h"
 
+#include "Interface/ApplicationInitData.h"
+
 #include "ApplicationWindow.h"
 #include "Timer.h"
 #include "Resources\ResourceManager.h"
@@ -137,7 +139,13 @@ bool Hail::InitEngine(StartupAttributes& startupData)
 	const float tickTime = 1.0f / g_engineData->applicationTickRate;
 	g_engineData->threadSynchronizer.Init(tickTime);
 	g_engineData->imguiCommandRecorder.Init(g_engineData->resourceManager);
-	startupData.initFunctionToCall(&g_engineData->inputHandler->GetInputMapping()); // Init the calling application
+
+	ApplcationInitData appInitData;
+	appInitData.m_pAsHandler = g_engineData->pAsHandler;
+	appInitData.m_pAsTypeRegistry = g_engineData->pAsHandler->GetTypeRegistry();
+	appInitData.m_pInputMapping = &g_engineData->inputHandler->GetInputMapping();
+
+	startupData.initFunctionToCall(&appInitData); // Init the calling application
 	g_engineData->updateFunctionToCall = startupData.updateFunctionToCall;
 	g_engineData->shutdownFunctionToCall = startupData.shutdownFunctionToCall;
 
@@ -314,14 +322,6 @@ void Hail::ProcessApplicationThread()
 	const float tickTime = 1.0f / engineData.applicationTickRate;
 	float applicationTime = 0.0;
 
-	AngelScript::Runner asScriptRunner;
-	g_engineData->pAsHandler->SetActiveScriptRunner(&asScriptRunner);
-	asScriptRunner.Initialize(g_engineData->pAsHandler->GetScriptEngine(), g_engineData->pAsHandler->GetTypeRegistry());
-
-	StringLW firstScriptPath = FilePath::GetAngelscriptDirectory().Data();
-	firstScriptPath += L"FirstScript.as";
-	asScriptRunner.ImportAndBuildScript(firstScriptPath.Data(), "FirstScript");
-
 	while(engineData.runApplication)
 	{
 		applicationTimer.FrameStart();
@@ -329,8 +329,6 @@ void Hail::ProcessApplicationThread()
 		if (applicationTime >= tickTime && !engineData.applicationLoopDone)
 		{
 			engineData.updateFunctionToCall(applicationTimer.GetTotalTime(), tickTime, engineData.threadSynchronizer.GetAppFrameData());
-			asScriptRunner.RunScript("FirstScript");
-			asScriptRunner.Update();
 			engineData.threadSynchronizer.PrepareApplicationData();
 			applicationTime = 0.0;
 			engineData.applicationLoopDone = true;
@@ -346,7 +344,6 @@ void Hail::ProcessApplicationThread()
 		g_engineData->runMainThread = false;
 	}
 
-	asScriptRunner.Cleanup();
 }
 
 void Hail::Cleanup()

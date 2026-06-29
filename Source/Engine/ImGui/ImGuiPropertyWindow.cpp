@@ -50,7 +50,7 @@ namespace
 
 		TextureContextAsset& texture = *(TextureContextAsset*)context->GetCurrentContextObject();
 
-		ImGui::Text("Name: %s", texture.m_fileObject.m_fileObject.Name().CharString());
+		ImGui::Text("Name: %s", texture.m_fileObject.m_fileObject.Name().ToCharString());
 		ImGui::Text("Texture Format: %s", GetSerializeableTextureTypeAsText((eTextureSerializeableType)texture.m_TextureProperties.textureType));
 		ImGui::Text("Width: %i Height: %i", texture.m_TextureProperties.width, texture.m_TextureProperties.height);
 		if (ImGui::Button("Reload Texture"))
@@ -60,7 +60,7 @@ namespace
 	ImGuiPropertyWindowReturnValue RenderMaterialProperty(Hail::ImGuiContext* context)
 	{
 		MaterialResourceContextObject& material = *(MaterialResourceContextObject*)context->GetCurrentContextObject();
-		ImGui::Text("Material Asset\nName: %s", material.m_fileObject->m_fileObject.Name().CharString());
+		ImGui::Text("Material Asset\nName: %s", material.m_fileObject->m_fileObject.Name().ToCharString());
 
 		ImGui::Text("Material Type: %s", ImGuiHelpers::GetMaterialTypeStringFromEnum(material.m_materialObject.m_baseMaterialType));
 		ImGui::Text("Blend Mode: %s", ImGuiHelpers::GetMaterialBlendModeFromEnum(material.m_materialObject.m_blendMode));
@@ -98,7 +98,7 @@ namespace
 			const FilePath texturePath = GetResourceRegistry().GetProjectPath(ResourceType::Texture, material.m_materialObject.m_textureHandles[i]);
 			if (!texturePath.IsValid())
 				continue;
-			ImGui::Text("%s", texturePath.Object().Name().CharString());
+			ImGui::Text("%s", texturePath.Object().Name().ToCharString());
 		}
 
 		ImGui::Separator();
@@ -116,12 +116,12 @@ namespace
 		if (!shader.m_pShader)
 		{
 			ImGui::Text("Shader Not Loaded");
-			ImGui::Text("Shader Asset\nName: %s", shader.m_pFileObject->m_fileObject.Name().CharString());
+			ImGui::Text("Shader Asset\nName: %s", shader.m_pFileObject->m_fileObject.Name().ToCharString());
 			return ImGuiPropertyWindowReturnValue::NoOp;
 		}
 
 
-		ImGui::Text("Shader Asset\nName: %s", shader.m_pFileObject->m_fileObject.Name().CharString());
+		ImGui::Text("Shader Asset\nName: %s", shader.m_pFileObject->m_fileObject.Name().ToCharString());
 		ImGui::Text("Shader Type: %s", ImGuiHelpers::GetShaderTypeFromEnum((eShaderStage)shader.m_pShader->header.shaderType));
 
 		return ImGuiPropertyWindowReturnValue::NoOp;

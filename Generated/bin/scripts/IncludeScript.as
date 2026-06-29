@@ -47,5 +47,53 @@ class Foo
     Vec2 m_pos = Vec2(200.25);
 }
 
+class PlayerMovementCapability : Capability
+{
+    void Setup()
+    {
+        m_bDrawCircle = true;
+    }
 
-int64 globalInt = 10;
+    bool ShouldActivate()
+    {
+        return true;
+    }
+
+    void TickActive(float deltaTime)
+    {
+        float movementSpeed = 5.0;
+        Vec2 direction = GetDirectionInput(PlayerMoveJoystickL, 0);
+        direction.y = direction.y * -1.0;
+        direction = direction.GetNormalized();
+        m_pos += direction * movementSpeed;
+
+        if (GetButtonInput(eInputAction::PlayerAction1, 0) == 1)
+        {
+            m_bDrawCircle = !m_bDrawCircle;
+        }
+
+        if (m_bDrawCircle)
+        {
+            DrawCircle(m_pos, m_radius);
+        }
+    }
+
+    void TickInactive(float deltaTime)
+    {
+
+    }
+
+    void OnActivated()
+    {
+
+    }
+
+    void OnDeactivated()
+    {
+
+    }
+
+    float m_radius = 10.1;
+    Vec2 m_pos =  Vec2(0.0);
+    bool m_bDrawCircle = true;
+}

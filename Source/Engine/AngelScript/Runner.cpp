@@ -162,6 +162,18 @@ void Hail::AngelScript::Runner::Cleanup()
 #endif
 }
 
+void Hail::AngelScript::Runner::AddMandatoryScriptPath(const char* pSectionName, const char* pMandatoryRelativeScriptPath)
+{
+	MandatoryScriptInclude& scriptSection = m_mandatoryScriptIncludes.Add();
+	scriptSection.m_name = pSectionName;
+	scriptSection.m_pRelativePath = pMandatoryRelativeScriptPath;
+
+	if (m_pDebuggerServer)
+	{
+		m_pDebuggerServer->AddMandatoryIncludePath(pMandatoryRelativeScriptPath);
+	}
+}
+
 bool Hail::AngelScript::Runner::CreateScript(String64 scriptName, Script& scriptToFill)
 {
 	H_ASSERT(!scriptToFill.m_filePath.IsEmpty(), "Script must have been created with a filepath");
@@ -203,7 +215,7 @@ bool Hail::AngelScript::Runner::CreateScript(String64 scriptName, Script& script
 
 	scriptToFill.m_fileNames.RemoveAll();
 	//TODO add all script fileNames
-	scriptToFill.m_fileNames.Add(scriptToFill.m_filePath.Object().Name().CharString());
+	scriptToFill.m_fileNames.Add(scriptToFill.m_filePath.Object().Name().ToCharString());
 
 	// Create our context, prepare it, and then execute
 	asIScriptContext* pCtx = m_pScriptEngine->CreateContext();
@@ -225,6 +237,32 @@ bool Hail::AngelScript::Runner::CreateScript(String64 scriptName, Script& script
 	{
 		scriptToFill.m_pDebugger = new ScriptDebugger(pCtx, m_pDebuggerServer, m_pTypeRegistry);
 	}
+
+	// Call trhe init function on the script if it exists
+	asIScriptModule* pScriptModule= m_pScriptEngine->GetModule(scriptName.Data());
+	asIScriptFunction* pInitFunc = pScriptModule->GetFunctionByDecl("void Init()");
+	if (pInitFunc)
+	{
+		// TODO: figure out how to get the script to be debuggable from the server. Maybe trigger reloads later.
+		//if (m_pDebuggerServer)
+		//{
+		//	scriptToFill.m_pDebugger->SetLineCallback();
+
+		//	m_pDebuggerServer->SetScriptToDebug(&scriptToFill);
+		//}
+		scriptToFill.m_pScriptContext->Prepare(pInitFunc);
+		int r = scriptToFill.m_pScriptContext->Execute();
+		if (r != asEXECUTION_FINISHED)
+		{
+			// The execution didn't complete as expected. Determine what happened.
+			if (r == asEXECUTION_EXCEPTION)
+			{
+				// An exception occurred, let the script writer know what happened so it can be corrected.
+				H_ERROR(StringL::Format("An exception '%s' occurred. Please correct the code and try again.", scriptToFill.m_pScriptContext->GetExceptionString()));
+			}
+		}
+	}
+
 	return true;
 }
 
@@ -239,8 +277,21 @@ bool Hail::AngelScript::Runner::CreateScriptModule(String64 scriptName, const Fi
 		H_ERROR("Unrecoverable error while starting a new module.");
 		return false;
 	}
-	// TODO add all files that are parts of the script
 	char filePathAsChar[1024];
+	for (uint32 iInclude = 0; iInclude < m_mandatoryScriptIncludes.Size(); iInclude++)
+	{
+		memset(filePathAsChar, 0, 1024);
+		const MandatoryScriptInclude& mandatoryInclude = m_mandatoryScriptIncludes[iInclude];
+		const FilePath scriptsBaseIncludePath = FilePath::GetAngelscriptDirectory() + StringLW(mandatoryInclude.m_pRelativePath).Data();
+		FromWCharToConstChar(scriptsBaseIncludePath.Data(), filePathAsChar, 1024);
+		r = builder.AddSectionFromFile(filePathAsChar);
+		if (r < 0)
+		{
+			H_ERROR(StringL::Format("Failed to load mandatory include: %s", mandatoryInclude.m_name));
+			return false;
+		}
+	}
+	memset(filePathAsChar, 0, 1024);
 	FromWCharToConstChar(pathToScript.Data(), filePathAsChar, 1024);
 	r = builder.AddSectionFromFile(filePathAsChar);
 	if (r < 0)
@@ -269,6 +320,7 @@ bool Hail::AngelScript::Runner::CreateScriptModule(String64 scriptName, const Fi
 		H_ERROR("The script must have the function 'void main()'. Please add it and try again.");
 		return false;
 	}
+
 	return true;
 }
 

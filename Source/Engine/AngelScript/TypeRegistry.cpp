@@ -311,7 +311,7 @@ bool Hail::AngelScript::TypeRegistry::RegisterClassConstructor(const char* typeN
 		H_ASSERT(false);
 	}
 	/*
-		r = m_pScriptEngine->RegisterObjectBehaviour("Vec2", asBEHAVE_CONSTRUCT, "void f()", asFUNCTION(Vec2DefaultConstructor), asCALL_CDECL_OBJLAST); H_ASSERT(r >= 0, "Failed to register Vec2 func");
+	r = m_pScriptEngine->RegisterObjectBehaviour("Vec2", asBEHAVE_CONSTRUCT, "void f()", asFUNCTION(Vec2DefaultConstructor), asCALL_CDECL_OBJLAST); H_ASSERT(r >= 0, "Failed to register Vec2 func");
 	r = m_pScriptEngine->RegisterObjectBehaviour("Vec2", asBEHAVE_CONSTRUCT, "void f(const Vec2 &in)", asFUNCTION(Vec2CopyConstructor), asCALL_CDECL_OBJLAST); H_ASSERT(r >= 0, "Failed to register Vec2 func");
 	r = m_pScriptEngine->RegisterObjectBehaviour("Vec2", asBEHAVE_CONSTRUCT, "void f(float)", asFUNCTION(Vec2ConvConstructor), asCALL_CDECL_OBJLAST); H_ASSERT(r >= 0, "Failed to register Vec2 func");
 	r = m_pScriptEngine->RegisterObjectBehaviour("Vec2", asBEHAVE_CONSTRUCT, "void f(float, float)", asFUNCTION(Vec2InitConstructor), asCALL_CDECL_OBJLAST); H_ASSERT(r >= 0, "Failed to register Vec2 func");

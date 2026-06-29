@@ -24,6 +24,7 @@ namespace Hail
 		class TypeRegistry;
 
 		Variable ASTypeToVariable(void* value, uint32 typeId, int expandMembers, asIScriptEngine* engine, TypeRegistry* pTypeRegistry);
+		StringL RemoveTypeInformationFromDeclaration(const char* stringToPrune);
 
 		class ScriptDebugger
 		{
@@ -118,6 +119,8 @@ namespace Hail
 			void RequestBuildErrors(MessageHeader header);
 			void RequestEngineTypes(MessageHeader header);
 			void AddBuildError(const BuildErrorInfo& buildError);
+			
+			void AddMandatoryIncludePath(const char* pMandatoryRelativeScriptPath);
 
 		private:
 
@@ -134,6 +137,8 @@ namespace Hail
 			GrowingArray<MessageHeader> m_returnRequests;
 			GrowingArray<BuildErrorInfo> m_registeredBuildErrors;
 
+			// Relative paths based from the AngelScript base directory, reconstructs the entire path on engine requests.
+			GrowingArray<const char*> m_mandatoryEngineIncludes;
 		};
 
 	}

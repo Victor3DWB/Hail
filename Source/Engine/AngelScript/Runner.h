@@ -30,6 +30,8 @@ namespace Hail
 
 			void Cleanup();
 
+			void AddMandatoryScriptPath(const char* pSectionName, const char* pMandatoryRelativeScriptPath);
+
 			DebuggerServer* GetDebuggerServer() { return m_pDebuggerServer; }
 
 		private:
@@ -42,6 +44,14 @@ namespace Hail
 			DebuggerServer* m_pDebuggerServer;
 			TypeRegistry* m_pTypeRegistry;
 			GrowingArray<Script> m_scripts;
+
+			struct MandatoryScriptInclude
+			{
+				String64 m_name;
+				const char* m_pRelativePath;
+			};
+
+			GrowingArray<MandatoryScriptInclude> m_mandatoryScriptIncludes;
 		};
 	}
 }

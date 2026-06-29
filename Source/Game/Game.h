@@ -2,6 +2,9 @@
 #pragma once
 #include "StartupAttributes.h"
 #include "InputMappings.h"
+
+#include "GameSystems/ScriptManager.h"
+
 namespace Hail
 {
 	struct ApplicationFrameData;
@@ -21,6 +24,8 @@ namespace Hail
 		Hail::InputMapping m_inputMapping;
 		Hail::RecordedImGuiCommands* m_recordedImguiCommands;
 		void FillFrameData(Hail::ApplicationCommandPool& renderCommandPoolToFill);
+
+		ScriptManager m_ScriptManager;
 
 	};
 }

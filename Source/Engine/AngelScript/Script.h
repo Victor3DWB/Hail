@@ -62,7 +62,7 @@ namespace Hail
 			bool m_bIsDirty;
 			
 			ScriptDebugger* m_pDebugger;
-			GrowingArray<String64> m_fileNames;
+			GrowingArray<StringL> m_fileNames;
 		};
 	}
 }

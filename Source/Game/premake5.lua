@@ -1,5 +1,5 @@
 project "Game"
-	location "%{dirs.localdir}"
+	location "%{dirs.srcdir}/Game"
 
 	print ("Building Game...")
 		
@@ -26,20 +26,36 @@ project "Game"
 		".",
 		"./**",
 		"%{dirs.srcdir}",
-		"%{dirs.srcdir}/Shared/"
+		"%{dirs.srcdir}/Shared/",
+		"%{dirs.extdir}/AngelScript/include/"
 	}
 
 	dependson { "ReflectionCodeGenerator" }
 
-	libdirs { "%{dirs.libdir}" }	
+	-- Libs
+	libdirs { "%{dirs.libdir}",
+		"%{dirs.extdir}/AngelScript/"
+	 }	
 	links { 
 		"Engine",
 		"ReflectionCodeGenerator",
 		"Shared"
 		 }
+ 	filter { "configurations:Debug" }
+	 	links { 
+			"angelscript64d"
+			 }
+	filter { "configurations:Release" }
+		links { 
+			"angelscript64"
+			 }
+	filter { "configurations:Production" }
+		links { 
+			"angelscript64"
+			 }
 
-		 	defines {
-
+ 	-- Defines
+ 	defines {
 	 	'SOURCE_DIR="' .. (dirs.sourcedir):gsub("%\\", "/") .. '/"',
 	 	'RESOURCE_DIR="' .. (dirs.resourcesindir):gsub("%\\", "/") .. '/"',
 	 	'SHADER_DIR_IN="' .. (dirs.shadersindir):gsub("%\\", "/") .. '/"',
@@ -48,6 +64,8 @@ project "Game"
 	 	'TEXTURES_DIR_OUT="' .. (dirs.texturesoutdir):gsub("%\\", "/") .. '/"',
 		'ANGELSCRIPT_DIR="' .. (dirs.angelscriptdir):gsub("%\\", "/") .. '/"'
 	}
+
+	-- Running prebuild commands, might comment out and rework
 
 	filter { "system:windows" }
 		prebuildcommands { "start %{dirs.outdir}/ReflectionCodeGenerator_%{cfg.buildcfg}.exe Game" }

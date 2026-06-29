@@ -50,8 +50,7 @@ namespace ReadMessages
 		}
 		else
 		{
-			const String64 fileName = filePath.Object().Name().CharString();
-			breakPoints.fileName = fileName.Data();
+			breakPoints.fileName = filePath.Object().Name().ToCharString();
 			// Get filename
 		}
 
@@ -334,10 +333,20 @@ DebuggerMessage Hail::AngelScript::CreateBuildErrorMessage(const MessageHeader& 
 	return message;
 }
 
-DebuggerMessage Hail::AngelScript::CreateEngineTypeResponseMessage(const MessageHeader& header, TypeDebuggerRegistry* pTypeDebuggerRegistry)
+DebuggerMessage Hail::AngelScript::CreateEngineTypeResponseMessage(const MessageHeader& header, TypeDebuggerRegistry* pTypeDebuggerRegistry, const GrowingArray<const char*>& mandatoryIncludePaths)
 {
 	DebuggerMessage message;
 	uint32 bufferOffset = 0;
+
+	WriteMessages::EncodeBaseType(message.m_data, bufferOffset, (uint32)mandatoryIncludePaths.Size());
+	for (uint32 iIncludePath = 0; iIncludePath < mandatoryIncludePaths.Size(); iIncludePath++)
+	{
+		char filePathAsChar[1024];
+		memset(filePathAsChar, 0, 1024);
+		const FilePath scriptsBaseIncludePath = FilePath::GetAngelscriptDirectory() + StringLW(mandatoryIncludePaths[iIncludePath]).Data();
+		FromWCharToConstChar(scriptsBaseIncludePath.Data(), filePathAsChar, 1024);
+		bufferOffset += WriteMessages::EncodeString(message.m_data, filePathAsChar);
+	}
 
 	const GrowingArray<TypeDebuggerRegistry::Enum>& registeredEnums = pTypeDebuggerRegistry->GetRegisteredEnums();
 	WriteMessages::EncodeBaseType(message.m_data, bufferOffset, (uint32)registeredEnums.Size());
@@ -378,6 +387,10 @@ DebuggerMessage Hail::AngelScript::CreateEngineTypeResponseMessage(const Message
 		const TypeDebuggerRegistry::Class& registeredClass = registeredGlobalClasses[iClass];
 		// Remove template type names
 		if (int endIndex = StringContainsAndEndsAtIndex(registeredClass.m_name.Data(), "<T>"))
+		{
+			bufferOffset += WriteMessages::EncodeString(message.m_data, registeredClass.m_name.Data(), endIndex);
+		}
+		else if(int endIndex = StringContainsAndEndsAtIndex(registeredClass.m_name.Data(), "_t"))
 		{
 			bufferOffset += WriteMessages::EncodeString(message.m_data, registeredClass.m_name.Data(), endIndex);
 		}

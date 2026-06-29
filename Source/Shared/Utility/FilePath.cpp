@@ -773,8 +773,8 @@ uint64_t Hail::FileObject::GetCachedLastWriteFileTime() const
 
 void Hail::FileObject::Reset()
 {
-    m_name = WString64();
-    m_parentName = WString64();
+    m_name = L'\0';
+    m_parentName = L'\0';
     m_extension[0] = L'\0';
     //m_length = 0;
     m_isDirectory = false;
@@ -853,7 +853,7 @@ RelativeFilePath::RelativeFilePath(const FilePath& longFilePath)
             memcpy(m_pathFromWorkingDir, &longFilePath.m_data[nameLengthToDirectory], m_pathLength * sizeof(wchar_t));
             m_pathFromWorkingDir[m_pathLength] = g_End;
             m_isInsideWorkingDirectory = true;
-            m_name = longFilePath.Object().Name().CharString();
+            m_name = longFilePath.Object().Name().ToCharString().Data();
             return;
         }
     }
@@ -877,7 +877,7 @@ RelativeFilePath::RelativeFilePath(const FilePath& longFilePath)
         memcpy(m_pathFromWorkingDir, &longFilePath.m_data[nameLengthToDirectory], m_pathLength * sizeof(wchar_t));
         m_pathFromWorkingDir[m_pathLength] = g_End;
     }
-    m_name = longFilePath.Object().Name().CharString();
+    m_name = longFilePath.Object().Name().ToCharString().Data();
 }
 
 RelativeFilePath::RelativeFilePath(const char* relativeProjectPath)
@@ -911,7 +911,7 @@ RelativeFilePath::RelativeFilePath(const char* relativeProjectPath)
             memcpy(m_pathFromWorkingDir, &longFilePath.m_data[nameLengthToDirectory], m_pathLength * sizeof(wchar_t));
             m_pathFromWorkingDir[m_pathLength] = g_End;
             m_isInsideWorkingDirectory = true;
-            m_name = longFilePath.Object().Name().CharString();
+            m_name = longFilePath.Object().Name().ToCharString().Data();
             return;
         }
     }
@@ -935,7 +935,7 @@ RelativeFilePath::RelativeFilePath(const char* relativeProjectPath)
         memcpy(m_pathFromWorkingDir, &longFilePath.m_data[nameLengthToDirectory], m_pathLength * sizeof(wchar_t));
         m_pathFromWorkingDir[m_pathLength] = g_End;
     }
-    m_name = longFilePath.Object().Name().CharString();
+    m_name = longFilePath.Object().Name().ToCharString().Data();
 }
 
 FilePath RelativeFilePath::GetFilePath() const
@@ -997,5 +997,5 @@ void RelativeFilePath::Deserialize(InOutStream& inObject)
     inObject.Read(&m_stepsFromFileToCommonSharedDir, sizeof(int16));
     inObject.Read(&m_directoryLevel, sizeof(uint16));
     inObject.Read(&m_isInsideWorkingDirectory, sizeof(bool));
-    m_name = GetFilePath().Object().Name().CharString();
+    m_name = GetFilePath().Object().Name().ToCharString().Data();
 }

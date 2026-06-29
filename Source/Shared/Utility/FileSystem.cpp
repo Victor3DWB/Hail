@@ -324,7 +324,7 @@ namespace Hail
                         bool isObjectInList = false;
                         for (uint32_t i = 0; i < m_extensionsToSearchFor.Size(); i++)
                         {
-                            if (m_extensionsToSearchFor[i] == currentObject.Extension().CharString())
+                            if (m_extensionsToSearchFor[i] == currentObject.Extension().ToCharString())
                             {
                                 isObjectInList = true;
                                 break;

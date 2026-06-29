@@ -38,8 +38,8 @@ namespace
 			return false;
 
 		ImGuiIO& io = ImGui::GetIO();
-		ImGui::BeginChild(fileObject.m_fileObject.Name().CharString().Data(), { ASSET_SIZE, ASSET_SIZE * 1.3 });
-		ImGuiID id = ImGui::GetID(fileObject.m_fileObject.Name().CharString().Data());
+		ImGui::BeginChild(fileObject.m_fileObject.Name().ToCharString().Data(), { ASSET_SIZE, ASSET_SIZE * 1.3 });
+		ImGuiID id = ImGui::GetID(fileObject.m_fileObject.Name().ToCharString().Data());
 
 		io.MousePos;
 		const ImVec2 windowPos = ImGui::GetWindowPos();
@@ -71,7 +71,7 @@ namespace
 		ImVec4 border_col = ImVec4(1.0, 1.0, 1.0, 0.10);
 		ImGui::Image(*(VkDescriptorSet*)imageResource->GetImguiTextureResource(), ImVec2(ASSET_SIZE * 0.9, ASSET_SIZE * 0.9), uv_min, uv_max, tint_col, border_col);
 
-		ImGui::TextWrapped(fileObject.m_fileObject.Name().CharString().Data());
+		ImGui::TextWrapped(fileObject.m_fileObject.Name().ToCharString().Data());
 		ImGui::EndChildFrame();
 		ImGui::EndChild();
 		if (hovered && io.MouseDoubleClicked[0])

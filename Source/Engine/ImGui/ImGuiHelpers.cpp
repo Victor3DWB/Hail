@@ -33,10 +33,10 @@ bool ImGuiHelpers::DirectoryPanelLogic(FileSystem* fileSystem, uint32 minimumDep
     for (size_t i = minimumDepth; i < fileSystem->GetCurrentDepth() + 1; i++)
     {
         const FileObject& directoryObject = fileObjects[i];
-        String64 folderName = directoryObject.Name().CharString();
+        StringL folderName = directoryObject.Name().ToCharString();
         if (i == fileSystem->GetCurrentDepth())
         {
-            folderName = "-> " + folderName;
+            folderName = StringL("-> ") + folderName;
         }
         if (ImGui::Selectable(folderName.Data(), false) && i != fileSystem->GetCurrentDepth())
         {
@@ -56,7 +56,7 @@ bool ImGuiHelpers::DirectoryPanelLogic(FileSystem* fileSystem, uint32 minimumDep
                 const SelectAbleFileObject& fileObject = filesAtDepth[iFileObject];
                 if (!fileObject.m_fileObject.IsDirectory())
                     continue;
-                if (ImGui::Selectable(fileObject.m_fileObject.Name().CharString().Data(), fileObject.m_selected))
+                if (ImGui::Selectable(fileObject.m_fileObject.Name().ToCharString().Data(), fileObject.m_selected))
                 {
                     selectedFileObject = fileObject.m_fileObject;
                     selectedDepth = fileObject.m_fileObject.GetDirectoryLevel();

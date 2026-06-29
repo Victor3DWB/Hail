@@ -76,8 +76,8 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(
 
 	if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) 
 	{
-		Debug_PrintConsoleConstChar(pCallbackData->pMessage);
 		// Message is important enough to show
+		H_ERROR(pCallbackData->pMessage);
 	}
 
 	return VK_FALSE;
@@ -199,7 +199,7 @@ bool VlkDevice::CheckValidationLayerSupport()
 	vkEnumerateInstanceLayerProperties(&layerCount, availableLayers);
 
 	uint32_t layersFound = 0;
-	Debug_PrintConsoleConstChar("Available validation layers:");
+	//Debug_PrintConsoleConstChar("Available validation layers:");
 	for (uint32_t foundLayer = 0; foundLayer < layerCount; foundLayer++)
 	{
 		for (uint32_t validationLayer = 0; validationLayer < VALIDATIONLAYERCOUNT; validationLayer++) {
@@ -208,7 +208,7 @@ bool VlkDevice::CheckValidationLayerSupport()
 				break;
 			}
 		}
-		Debug_PrintConsoleStringL(StringL::Format("\t%s", availableLayers[foundLayer].layerName));
+		//Debug_PrintConsoleStringL(StringL::Format("\t%s", availableLayers[foundLayer].layerName));
 	}
 
 	if (layersFound != VALIDATIONLAYERCOUNT) {
@@ -232,7 +232,7 @@ bool VlkDevice::CheckRequiredExtensions(ErrorManager* pErrorManager)
 
 	uint32_t foundCounter = 0;
 
-	Debug_PrintConsoleConstChar("Available vKInstance extensions:");
+	//Debug_PrintConsoleConstChar("Available vKInstance extensions:");
 	for (uint32_t reqExtension = 0; reqExtension < REQUIREDEXTENSIONCOUNT; reqExtension++)
 	{
 		bool bFoundExtension = false;
@@ -346,7 +346,7 @@ bool VlkDevice::CheckDeviceExtensionSupport(VkPhysicalDevice device)
 	vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.Data());
 
 	uint32_t foundCounter = 0;
-	Debug_PrintConsoleConstChar("Available device extensions:");
+	//Debug_PrintConsoleConstChar("Available device extensions:");
 	for (uint32_t extension = 0; extension < extensionCount; extension++)
 	{
 		for (uint32_t reqExtension = 0; reqExtension < DEVICEEXTENSIONCOUNT; reqExtension++)
@@ -357,7 +357,7 @@ bool VlkDevice::CheckDeviceExtensionSupport(VkPhysicalDevice device)
 				break;
 			}
 		}
-		Debug_PrintConsoleStringL(StringL::Format("\t%s", availableExtensions[extension].extensionName));
+		//Debug_PrintConsoleStringL(StringL::Format("\t%s", availableExtensions[extension].extensionName));
 	}
 	if (foundCounter != DEVICEEXTENSIONCOUNT)
 	{

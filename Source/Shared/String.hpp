@@ -117,6 +117,53 @@ static String64 operator+(const String64& string1, const String64& string2)
 	return str;
 }
 
+namespace Hail
+{
+	// Long string, used for debug messageing and tools
+	class StringL
+	{
+	public:
+		StringL();
+		StringL(const char* const string);
+		StringL(const StringL& anotherString);
+		StringL(const String64& string64);
+		StringL(StringL&& moveableString);
+		StringL(const std::string& stlString);
+		~StringL();
+
+		static StringL Format(const char* const format, ...);
+
+		operator const char* () const;
+		operator char* ();
+		StringL& operator=(const StringL& anotherString);
+		StringL& operator=(StringL&& moveableString);
+		StringL& operator=(const char* const pString);
+		StringL& operator+=(StringL& anotherString);
+		StringL& operator+=(const char* pString);
+		StringL& operator+=(const char character);
+		StringL operator+(const StringL& string1);
+
+		char* Data();
+		const char* const Data() const;
+		void Reserve(uint32 numOfChars);
+		void RemoveCharsFromBack(uint32 numOfChars);
+		// DeAllocates memory if this string uses a memory pool, and sets length to 0.
+		void Clear();
+
+		const uint32 Length() const { return m_length; }
+
+	private:
+
+		union stringMemory
+		{
+			char* m_p;
+			char m_shortString[16];
+		}m_memory;
+		uint32 m_length;
+		uint32 m_allocatedLength;
+	};
+}
+
 class WString64
 {
 public:
@@ -191,7 +238,7 @@ public:
 	}
 	const uint32_t Length() const { return wcslen(m_data); }
 
-	String64 CharString() const 
+	String64 ToCharString() const 
 	{ 
 		String64 returnString;
 		Hail::FromWCharToConstChar(m_data, returnString.Data(), 64u);
@@ -283,13 +330,26 @@ public:
 	}
 	WString256& operator=(WString256&& moveableString) noexcept
 	{
-		wcscpy_s(m_data, moveableString);
-
+		if (moveableString)
+		{
+			wcscpy_s(m_data, moveableString);
+		}
+		else
+		{
+			m_data[0] = 0;
+		}
 		return *this;
 	}
 	WString256& operator=(const wchar_t* const pString)
 	{
-		wcscpy_s(m_data, pString);
+		if (pString)
+		{
+			wcscpy_s(m_data, pString);
+		}
+		else
+		{
+			m_data[0] = 0;
+		}
 
 		return *this;
 	}
@@ -298,6 +358,14 @@ public:
 		return m_data;
 	}
 	const uint32_t Length() const { return wcslen(m_data); }
+
+	Hail::StringL ToCharString() const
+	{
+		Hail::StringL returnString;
+		returnString.Reserve(Length());
+		Hail::FromWCharToConstChar(m_data, returnString.Data(), 256);
+		return returnString;
+	}
 
 private:
 	wchar_t m_data[256];
@@ -328,49 +396,7 @@ static WString256 operator+(const WString256& string1, const WString256& string2
 
 namespace Hail
 {
-	// Long string, used for debug messageing and tools
-	class StringL
-	{
-	public:
-		StringL();
-		StringL(const char* const string);
-		StringL(const StringL& anotherString);
-		StringL(const String64& string64);
-		StringL(StringL&& moveableString);
-		StringL(const std::string& stlString);
-		~StringL();
 
-		static StringL Format(const char* const format, ...);
-
-		operator const char* () const;
-		operator char* ();
-		StringL& operator=(const StringL& anotherString);
-		StringL& operator=(StringL&& moveableString);
-		StringL& operator=(const char* const pString);
-		StringL& operator+=(StringL& anotherString);
-		StringL& operator+=(const char* pString);
-		StringL& operator+=(const char character);
-		StringL operator+(const StringL& string1);
-
-		char* Data();
-		const char* const Data() const;
-		void Reserve(uint32 numOfChars);
-		void RemoveCharsFromBack(uint32 numOfChars);
-		// DeAllocates memory if this string uses a memory pool, and sets length to 0.
-		void Clear();
-
-		const uint32 Length() const { return m_length; }
-
-	private:
-
-		union stringMemory
-		{
-			char* m_p;
-			char m_shortString[16];
-		}m_memory;
-		uint32 m_length;
-		uint32 m_allocatedLength;
-	};
 
 	// Long wide string, used for all UI. 
 	// TODO, add support for translation and serialization
@@ -402,7 +428,7 @@ namespace Hail
 		wchar_t* Data();
 		const wchar_t* const Data() const;
 
-		StringL ToCharString();
+		StringL ToCharString() const;
 
 		// Returns length in number of characters, not byte length.
 		const uint32 Length() const { return m_length; }

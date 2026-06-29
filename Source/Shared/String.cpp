@@ -519,8 +519,15 @@ const char* const Hail::StringL::Data() const
 void Hail::StringL::Reserve(uint32 numOfChars)
 {
 	m_length = numOfChars;
-	StringMemoryAllocator::GetInstance().AllocateString(nullptr, m_length, &m_memory.m_p);
-	m_allocatedLength = m_length;
+	if (numOfChars > 15)
+	{
+		if (m_allocatedLength > 0)
+		{
+			StringMemoryAllocator::GetInstance().DeallocateString(&m_memory.m_p);
+		}
+		StringMemoryAllocator::GetInstance().AllocateString(nullptr, m_length, &m_memory.m_p);
+		m_allocatedLength = m_length;
+	}
 }
 
 void Hail::StringL::RemoveCharsFromBack(uint32 numOfChars)
@@ -1104,7 +1111,7 @@ const wchar_t* const Hail::StringLW::Data() const
 	return m_length > 7u ? m_memory.m_p : m_memory.m_shortString;
 }
 
-Hail::StringL Hail::StringLW::ToCharString()
+Hail::StringL Hail::StringLW::ToCharString() const
 {
 	StringL returnString;
 	returnString.Reserve(m_length);

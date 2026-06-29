@@ -5,6 +5,7 @@
 #include <iostream>
 #include "Engine/ThreadSynchronizer.h"
 #include "Engine/RenderCommands.h"
+#include "Engine/Interface/ApplicationInitData.h"
 
 #include "Camera.h"
 #include "Engine/Input/InputActionMap.h"
@@ -57,6 +58,9 @@ namespace Hail
 
 	void GameApplication::Init(void* initData)
 	{
+		ApplcationInitData* pAppInitData = (ApplcationInitData*)initData;
+		m_ScriptManager.Init(pAppInitData->m_pAsHandler, pAppInitData->m_pAsTypeRegistry);
+
 		spaceShipGuid.m_data1 = 3698324670;
 		spaceShipGuid.m_data2 = 58616;
 		spaceShipGuid.m_data3 = 18806;
@@ -95,7 +99,7 @@ namespace Hail
 		Hail::ResourceInterface::LoadMaterialInstanceResource(debugGridGuid);
 
 		g_camera.GetTransform() = glm::lookAt(glm::vec3(300.0f, 300.0f, 300.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		m_inputMapping = *reinterpret_cast<Hail::InputMapping*>(initData);
+		m_inputMapping = *pAppInitData->m_pInputMapping;
 		player.transform.SetPosition({ 0.5f, 0.5f });
 		player.bSizeRelativeToRenderTarget = false;
 		player.transform.SetScale({ 1.f, 1.f });
@@ -166,6 +170,9 @@ namespace Hail
 
 	void GameApplication::Update(double totalTime, float deltaTime, Hail::ApplicationFrameData& recievedFrameData)
 	{
+		m_ScriptManager.Update();
+
+
 		if (sprites[0].materialInstanceID == MAX_UINT && Hail::ResourceInterface::GetMaterialResourceState(backgroundGuid) == eResourceState::Loaded)
 			sprites[0].materialInstanceID = Hail::ResourceInterface::GetMaterialInstanceResourceHandle(backgroundGuid);
 		if (player.materialInstanceID == MAX_UINT && Hail::ResourceInterface::GetMaterialResourceState(spaceShipGuid) == eResourceState::Loaded)
@@ -320,6 +327,8 @@ namespace Hail
 
 	void GameApplication::Shutdown()
 	{
+		m_ScriptManager.Cleanup();
+
 		g_textCommand1.text.Clear();
 		g_textCounter.text.Clear();
 		g_textCounterNumber.text.Clear();

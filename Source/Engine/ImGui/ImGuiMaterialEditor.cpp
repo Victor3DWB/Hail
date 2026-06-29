@@ -49,7 +49,7 @@ void Hail::ImGuiMaterialEditor::RenderImGuiCommands(ImGuiFileBrowser* fileBrowse
 {
 	InitCommonData();
 	ImGui::Begin("Material Editor", closeButton);
-	ImGui::Text("Material Name: %s", m_materialToEdit.m_fileObject->m_fileObject.Name().CharString());
+	ImGui::Text("Material Name: %s", m_materialToEdit.m_fileObject->m_fileObject.Name().ToCharString());
 
 	if (m_materialToEdit.m_materialObject.m_baseMaterialType == eMaterialType::COUNT)
 	{
@@ -180,7 +180,7 @@ void Hail::ImGuiMaterialEditor::RenderImGuiCommands(ImGuiFileBrowser* fileBrowse
 		if (m_materialToEdit.m_materialObject.m_textureHandles[i] == GuidZero)
 			ImGui::Text("None");
 		else
-			ImGui::Text(GetResourceRegistry().GetProjectPath(ResourceType::Texture, m_materialToEdit.m_materialObject.m_textureHandles[i]).Object().Name().CharString());
+			ImGui::Text(GetResourceRegistry().GetProjectPath(ResourceType::Texture, m_materialToEdit.m_materialObject.m_textureHandles[i]).Object().Name().ToCharString());
 		ImGui::SameLine();
 		if (ImGui::Button(String64::Format("Replace Texture %i", i)) && fileBrowser->Init(&g_textureFileBrowserData))
 		{

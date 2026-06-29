@@ -1029,12 +1029,12 @@ namespace Hail
 	{
 		ResourceRegistry& reg = GetResourceRegistry();
 		const FilePath shaderSourcePath = reg.GetSourcePath(ResourceType::Shader, shaderGUID);
-		return LoadShader(shaderSourcePath.Object().Name().CharString(), eShaderStage::None, false, shaderSourcePath.Object().Extension().CharString());
+		return LoadShader(shaderSourcePath.Object().Name().ToCharString(), eShaderStage::None, false, shaderSourcePath.Object().Extension().ToCharString());
 	}
 
 	FilePath MaterialManager::ImportShaderResource(const FilePath& filepath)
 	{
-		CompiledShader* pShader = LoadShader(filepath.Object().Name().CharString(), eShaderStage::None, false, filepath.Object().Extension().CharString());
+		CompiledShader* pShader = LoadShader(filepath.Object().Name().ToCharString(), eShaderStage::None, false, filepath.Object().Extension().ToCharString());
 		if (pShader)
 		{
 			return pShader->m_metaData.GetProjectFilePath().GetFilePath();
@@ -1044,7 +1044,7 @@ namespace Hail
 
 	FilePath MaterialManager::ImportShaderResource(const FilePath& filepath, eShaderStage shaderStage, bool bForceReload)
 	{
-		CompiledShader* pShader = LoadShader(filepath.Object().Name().CharString(), shaderStage, bForceReload, filepath.Object().Extension().CharString());
+		CompiledShader* pShader = LoadShader(filepath.Object().Name().ToCharString(), shaderStage, bForceReload, filepath.Object().Extension().ToCharString());
 		if (pShader)
 		{
 			return pShader->m_metaData.GetProjectFilePath().GetFilePath();
