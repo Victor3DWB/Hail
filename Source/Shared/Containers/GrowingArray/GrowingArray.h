@@ -262,7 +262,7 @@ namespace Hail
 			GrowArray(m_elementCount + numberOfItemsToAdd * 2);
 
 		for (size_t i = m_elementCount; i < m_capacity; i++)
-			m_arrayPointer[m_elementCount] = {};
+			m_arrayPointer[i] = {};
 
 		m_elementCount += numberOfItemsToAdd;
 	}
@@ -277,7 +277,7 @@ namespace Hail
 			GrowArray(m_elementCount + numberOfItemsToAdd * 2);
 
 		for (size_t i = m_elementCount; i < m_capacity; i++)
-			m_arrayPointer[m_elementCount] = object;
+			m_arrayPointer[i] = object;
 
 		m_elementCount += numberOfItemsToAdd;
 	}
