@@ -13,6 +13,7 @@ namespace Hail
 	{
 		uint16 m_keyValue{};
 	};
+	// Rename this class and file
 	class InputActionMap
 	{
 	public:

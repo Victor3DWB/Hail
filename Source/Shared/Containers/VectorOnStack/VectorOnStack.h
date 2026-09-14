@@ -32,7 +32,7 @@ public:
 	}
 	inline void Clear();
 	inline void DeleteAll();
-	inline bool Empty() { return static_cast<bool>(m_end == 0); }
+	inline bool Empty() const { return static_cast<bool>(m_end == 0); }
 	Type Last() const;
 	inline Type RemoveLast();
 	void TransferSize(const VectorOnStack& otherArray);

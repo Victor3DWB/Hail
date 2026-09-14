@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Types.h"
+#include "Entity.h"
+#include "Utility/Filepath.hpp"
 
 class asIScriptObject;
 class asIScriptContext;
@@ -8,6 +10,20 @@ class asILockableSharedBool;
 
 namespace Hail
 {
+    class ScriptManager;
+    class CapabilitySystem;
+
+    struct CapabilityCreationRequest
+    {
+        FilePath m_scriptFilePath;
+        String64 m_capabilityName;
+    };
+
+    enum class ERegisteredAngelScriptClasses
+    {
+        Capability
+    };
+
     namespace AngelScript
     {
         class TypeRegistry;
@@ -31,11 +47,11 @@ namespace Hail
         Post
     };
 
-    void RegisterCapability(AngelScript::TypeRegistry* pTypeRegistry);
 
 	class Capability
 	{
     public:
+        static void RegisterAngelscriptFunctions(AngelScript::TypeRegistry* pTypeRegistry);
         // Array<HashString> Tags;
         // Array<Object> Blockers;
 
@@ -68,6 +84,8 @@ namespace Hail
 
         static Capability* Factory();
 
+        void SetOwningEntity(const Entity& entity);
+
         // Reference counting
         void AddRef();
         void Release();
@@ -91,13 +109,24 @@ namespace Hail
         Capability(asIScriptObject* obj);
         ~Capability();
 
+        int32 GetRefCount() const { return m_refCount; }
+
+        asIScriptObject* GetObject() { return m_pObj; }
+
+        const char* GetCapabilityName() const;
+        uint32 GetId() const { return m_id; }
+    private:
+        friend class CapabilitySystem;
         asIScriptContext* CallInternalObjectFunction(const char* functionName, const char* functionFullType, float* pFloatArgument = nullptr) const;
         // Reference count
-        int m_refCount;
+        int32 m_refCount;
 
         // The C++ side holds a weak link to the script side to avoid a circular reference between the C++ side and script side
         asILockableSharedBool* m_pIsDead;
         asIScriptObject* m_pObj;
+
+        EntityHandle m_owningEntityId;
+        const uint32 m_id;
 
         // bool IsBlocked() const
         // {

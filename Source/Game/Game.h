@@ -3,10 +3,19 @@
 #include "StartupAttributes.h"
 #include "InputMappings.h"
 
+#include "GameSystems/EntityManager.h"
+#include "GameSystems/PhysicsSystem.h"
 #include "GameSystems/ScriptManager.h"
+#include "GameSystems/ComponentManager.h"
+#include "GameSystems/CapabilitySystem.h"
 
 namespace Hail
 {
+	namespace AngelScript
+	{
+		class Handler;
+	}
+
 	struct ApplicationFrameData;
 	struct RecordedImGuiCommands;
 	struct ApplicationCommandPool;
@@ -25,7 +34,17 @@ namespace Hail
 		Hail::RecordedImGuiCommands* m_recordedImguiCommands;
 		void FillFrameData(Hail::ApplicationCommandPool& renderCommandPoolToFill);
 
-		ScriptManager m_ScriptManager;
+		ScriptManager m_scriptManager;
+		PhysicsSystem m_physicsSystem;
+		EntityManager m_entityManager;
+
+		ComponentManager m_componentManager;
+		CapabilitySystem m_capabilitySystem;
+
+		AngelScript::Handler* m_pAsHandler;
+
+
+
 
 	};
 }

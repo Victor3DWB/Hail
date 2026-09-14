@@ -1,4 +1,4 @@
-#include "Engine_PCH.h"
+#include "Game_PCH.h"
 #include <new>
 
 #include <stdlib.h>
@@ -324,42 +324,42 @@ static void RegisterScriptArray_Native(TypeRegistry* pTypeRegistry)
 	bResult = pTypeRegistry->RegisterManagedClassConstructor("Array<T>", "void f()", { }, asBEHAVE_RELEASE, asCALL_THISCALL, asMETHOD(ScriptArray, Release), H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
 
 	// The index operator returns the template subtype
-	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "opIndex", "T", EVariableTypeDataState::Ref }, { {"index", "uint"}}, asMETHODPR(ScriptArray, At, (asUINT), void*), H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
-	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "opIndex", "T", EVariableTypeDataState::ConstRef }, { {"index", "uint"} }, asMETHODPR(ScriptArray, At, (asUINT) const, const void*), H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
+	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "opIndex", "T", EVariableTypeDataState::Ref }, { {"index", "uint"}}, asMETHODPR(ScriptArray, At, (asUINT), void*), asCALL_THISCALL, H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
+	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "opIndex", "T", EVariableTypeDataState::ConstRef }, { {"index", "uint"} }, asMETHODPR(ScriptArray, At, (asUINT) const, const void*), asCALL_THISCALL, H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
 
 	// The assignment operator
 	bResult = pTypeRegistry->RegisterClassOperatorOverload("Array<T>", { "opAssign", "Array<T>", EVariableTypeDataState::Ref }, asMETHOD(ScriptArray, operator=), H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
 
 	// Other methods
-	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "AddAt", "void" }, { {"index", "uint"}, {"in", "T", EVariableTypeDataState::ConstRef, "value"}}, asMETHODPR(ScriptArray, At, (asUINT) const, const void*), H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
-	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "AddAt", "void" }, { {"index", "uint"}, {"arr", "Array<T>", EVariableTypeDataState::ConstRef} }, asMETHODPR(ScriptArray, AddAt, (asUINT, const ScriptArray&), void), H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
-	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "Add", "void" }, { {"in", "T", EVariableTypeDataState::ConstRef, "value"}}, asMETHOD(ScriptArray, Add), H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
-	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "RemoveAt", "void" }, { {"index", "uint"} }, asMETHOD(ScriptArray, RemoveAt), H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
-	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "RemoveLast", "void" }, { }, asMETHOD(ScriptArray, RemoveLast), H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
-	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "RemoveRange", "void" }, { {"start", "uint"}, {"count", "uint"} }, asMETHOD(ScriptArray, RemoveRange), H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
+	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "AddAt", "void" }, { {"index", "uint"}, {"in", "T", EVariableTypeDataState::ConstRef, "value"}}, asMETHODPR(ScriptArray, At, (asUINT) const, const void*), asCALL_THISCALL, H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
+	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "AddAt", "void" }, { {"index", "uint"}, {"arr", "Array<T>", EVariableTypeDataState::ConstRef} }, asMETHODPR(ScriptArray, AddAt, (asUINT, const ScriptArray&), void), asCALL_THISCALL, H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
+	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "Add", "void" }, { {"in", "T", EVariableTypeDataState::ConstRef, "value"}}, asMETHOD(ScriptArray, Add), asCALL_THISCALL, H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
+	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "RemoveAt", "void" }, { {"index", "uint"} }, asMETHOD(ScriptArray, RemoveAt), asCALL_THISCALL, H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
+	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "RemoveLast", "void" }, { }, asMETHOD(ScriptArray, RemoveLast), asCALL_THISCALL, H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
+	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "RemoveRange", "void" }, { {"start", "uint"}, {"count", "uint"} }, asMETHOD(ScriptArray, RemoveRange), asCALL_THISCALL, H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
 #if AS_USE_ACCESSORS != 1
-	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "Size", "uint", EVariableTypeDataState::Const }, { }, asMETHOD(ScriptArray, GetCount), H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
+	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "Size", "uint", EVariableTypeDataState::Const }, { }, asMETHOD(ScriptArray, GetCount), asCALL_THISCALL, H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
 #endif
-	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "Reserve", "void" }, { {"length", "uint"} }, asMETHOD(ScriptArray, Reserve), H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
-	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "Resize", "void" }, { {"length", "uint"} }, asMETHODPR(ScriptArray, Resize, (asUINT), void), H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
-	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "SortAsc", "void" }, { }, asMETHODPR(ScriptArray, SortAsc, (), void), H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
-	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "SortAsc", "void" }, { {"startAt", "uint"}, {"count", "uint"} }, asMETHODPR(ScriptArray, SortAsc, (asUINT, asUINT), void), H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
-	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "SortDesc", "void" }, { }, asMETHODPR(ScriptArray, SortDesc, (), void), H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
-	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "SortDesc", "void" }, { {"startAt", "uint"}, {"count", "uint"} }, asMETHODPR(ScriptArray, SortDesc, (asUINT, asUINT), void), H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
-	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "Reverse", "void" }, { }, asMETHOD(ScriptArray, Reverse), H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
+	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "Reserve", "void" }, { {"length", "uint"} }, asMETHOD(ScriptArray, Reserve), asCALL_THISCALL, H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
+	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "Resize", "void" }, { {"length", "uint"} }, asMETHODPR(ScriptArray, Resize, (asUINT), void), asCALL_THISCALL, H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
+	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "SortAsc", "void" }, { }, asMETHODPR(ScriptArray, SortAsc, (), void), asCALL_THISCALL, H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
+	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "SortAsc", "void" }, { {"startAt", "uint"}, {"count", "uint"} }, asMETHODPR(ScriptArray, SortAsc, (asUINT, asUINT), void), asCALL_THISCALL, H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
+	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "SortDesc", "void" }, { }, asMETHODPR(ScriptArray, SortDesc, (), void), asCALL_THISCALL, H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
+	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "SortDesc", "void" }, { {"startAt", "uint"}, {"count", "uint"} }, asMETHODPR(ScriptArray, SortDesc, (asUINT, asUINT), void), asCALL_THISCALL, H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
+	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "Reverse", "void" }, { }, asMETHOD(ScriptArray, Reverse), asCALL_THISCALL, H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
 	// The token 'if_handle_then_const' tells the engine that if the type T is a handle, then it should refer to a read-only object
-	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "Find", "int", EVariableTypeDataState::Const }, { {"in", "T", EVariableTypeDataState::ConstRef, "if_handle_then_const value"} }, asMETHODPR(ScriptArray, Find, (void*) const, int), H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
+	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "Find", "int", EVariableTypeDataState::Const }, { {"in", "T", EVariableTypeDataState::ConstRef, "if_handle_then_const value"} }, asMETHODPR(ScriptArray, Find, (void*) const, int), asCALL_THISCALL, H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
 	// TODO: It should be "int find(const T&in value, uint startAt = 0) const"
-	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "Find", "int", EVariableTypeDataState::Const }, { {"startAt", "uint"}, {"in", "T", EVariableTypeDataState::ConstRef, "if_handle_then_const value"} }, asMETHODPR(ScriptArray, Find, (void*) const, int), H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
-	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "FindByRef", "int", EVariableTypeDataState::Const }, { {"in", "T", EVariableTypeDataState::ConstRef, "if_handle_then_const value"} }, asMETHODPR(ScriptArray, FindByRef, (void*) const, int), H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
+	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "Find", "int", EVariableTypeDataState::Const }, { {"startAt", "uint"}, {"in", "T", EVariableTypeDataState::ConstRef, "if_handle_then_const value"} }, asMETHODPR(ScriptArray, Find, (void*) const, int), asCALL_THISCALL, H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
+	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "FindByRef", "int", EVariableTypeDataState::Const }, { {"in", "T", EVariableTypeDataState::ConstRef, "if_handle_then_const value"} }, asMETHODPR(ScriptArray, FindByRef, (void*) const, int), asCALL_THISCALL, H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
 	// TODO: It should be "int findByRef(const T&in value, uint startAt = 0) const"
-	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "FindByRef", "int", EVariableTypeDataState::Const }, { {"startAt", "uint"}, {"in", "T", EVariableTypeDataState::ConstRef, "if_handle_then_const value"} }, asMETHODPR(ScriptArray, FindByRef, (asUINT, void*) const, int), H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
-	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "opEquals", "bool", EVariableTypeDataState::Const }, { {"in", "Array<T>", EVariableTypeDataState::ConstRef} }, asMETHOD(ScriptArray, operator==), H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
-	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "IsEmpty", "bool", EVariableTypeDataState::Const }, { }, asMETHOD(ScriptArray, IsEmpty), H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
+	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "FindByRef", "int", EVariableTypeDataState::Const }, { {"startAt", "uint"}, {"in", "T", EVariableTypeDataState::ConstRef, "if_handle_then_const value"} }, asMETHODPR(ScriptArray, FindByRef, (asUINT, void*) const, int), asCALL_THISCALL, H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
+	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "opEquals", "bool", EVariableTypeDataState::Const }, { {"in", "Array<T>", EVariableTypeDataState::ConstRef} }, asMETHOD(ScriptArray, operator==), asCALL_THISCALL, H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
+	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "IsEmpty", "bool", EVariableTypeDataState::Const }, { }, asMETHOD(ScriptArray, IsEmpty), asCALL_THISCALL, H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
 
 	// Sort with callback for comparison
 	r = engine->RegisterFuncdef("bool Array<T>::less(const T&in if_handle_then_const a, const T&in if_handle_then_const b)");
-	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "sort", "void" }, { {"in", "less", EVariableTypeDataState::ConstRef }, {"startAt", "uint", EVariableTypeDataState::None, " = 0"}, {"count", "uint", EVariableTypeDataState::None, " =  uint(-1)"} }, asMETHODPR(ScriptArray, Sort, (asIScriptFunction*, asUINT, asUINT), void), H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
+	bResult = pTypeRegistry->RegisterClassMethod("Array<T>", { "sort", "void" }, { {"in", "less", EVariableTypeDataState::ConstRef }, {"startAt", "uint", EVariableTypeDataState::None, " = 0"}, {"count", "uint", EVariableTypeDataState::None, " =  uint(-1)"} }, asMETHODPR(ScriptArray, Sort, (asIScriptFunction*, asUINT, asUINT), void), asCALL_THISCALL, H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");
 
 	// Register GC behaviours in case the array needs to be garbage collected
 	bResult = pTypeRegistry->RegisterManagedClassConstructor("Array<T>", "int f()", { }, asBEHAVE_GETREFCOUNT, asCALL_THISCALL, asMETHOD(ScriptArray, GetRefCount), H_FILE_LINE); H_ASSERT(bResult, "Failed to register Array func");

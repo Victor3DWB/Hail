@@ -15,9 +15,7 @@ project "Shared"
 	pchsource "Shared_PCH.cpp"
 
 	includedirs {
-		".",
-		"./**",
-		"%{dirs.srcdir}",
+		"%{dirs.srcdir}/Shared"
 	}
 
 	files {

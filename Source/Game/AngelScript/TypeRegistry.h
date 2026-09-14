@@ -127,7 +127,7 @@ namespace Hail
 			bool RegisterType(const char* typeName, uint32 sizeOfType, uint64 flags, const char* sourceFileName, int line, const char* registerNameOverride = nullptr);
 			bool RegisterVariableFunction(const char* typeName, ToVariableCallback callbackToRegister);
 
-			bool RegisterClassMethod(const char* typeName, VariableTypeData function, VectorOnStack<VariableTypeData, 8u> argumentVariables, const asSFuncPtr& funcPointer, const char* sourceFileName, int line);
+			bool RegisterClassMethod(const char* typeName, VariableTypeData function, VectorOnStack<VariableTypeData, 8u> argumentVariables, const asSFuncPtr& funcPointer, int64 callingConvention, const char* sourceFileName, int line);
 			bool RegisterClassMethodGenericFuncPtr(const char* typeName, VariableTypeData function, VectorOnStack<VariableTypeData, 8u> argumentVariables, const asSFuncPtr& funcPointer, const char* sourceFileName, int line);
 			// Creates setters and getters for properties: "void set_x(float) property". Like exampleVector.x or exampleVector.y = 10.0
 			// Does not get sent to Angelscript LSP
@@ -141,6 +141,8 @@ namespace Hail
 
 			bool RegisterGlobalMethod(VariableTypeData function, VectorOnStack<VariableTypeData, 8u> argumentVariables, const asSFuncPtr& funcPointer, const char* sourceFileName, int line);
 			bool RegisterGlobalEnumValue(const char* name, const char* valueName, uint32 value, const char* sourceFileName, int line);
+
+			bool RegisterGlobalProperty(VariableTypeData property, void* pObjectPointer);
 
 			Variable GetVariableFromCallback(uint32 typeID, void* pObject);
 			asIScriptEngine* GetEngine() { return m_pScriptEngine; }

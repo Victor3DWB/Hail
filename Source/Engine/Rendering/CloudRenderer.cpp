@@ -13,7 +13,7 @@
 #include "RenderContext.h"
 #include "MathUtils.h"
 #include "RenderCommands.h"
-#include "Utility\DebugLineHelpers.h"
+#include "Interface\DebugLineHelpers.h"
 #include "imgui.h"
 
 namespace Hail

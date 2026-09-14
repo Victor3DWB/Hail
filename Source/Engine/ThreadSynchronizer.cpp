@@ -5,7 +5,7 @@
 #include "Resources\ResourceManager.h"
 #include "Rendering\SwapChain.h"
 #include "Input\InputActionMap.h"
-#include "Utility\Sorting.h"
+#include "EngineUtility\Sorting.h"
 
 using namespace Hail;
 

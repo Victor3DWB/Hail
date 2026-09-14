@@ -1,25 +1,11 @@
 # Hail
  Custom game engine - framework for c++ game development
 
-# TODO: priority order for project
+# Current Goal: 
 
-- [x] Text render commands.
-- [x] Depth Sorting of sprite and text commands.
-- [x] Implement batch rendering of sprites and fonts.
-- [x] Cloud rendering experiment of a point cloud dataset.
-- [x] First draft Update cloud point data as a fluid for dynamic clouds.
-- [x] Rewrite the fluid solver not after Sebastians video (Coding Adventure: Simulating Fluids) but this paper: Smoothed Particle Hydrodynamics. Techniques for the Physics Based Simulation of Fluids and Solids.
-- [x] Compute shader support.
-- [x] Texture views to have read only, write only and read write access to textures (might need to add memory barriers for the reading).
-- [x] Sorting with a compute shader.
-- [x] liquid simulation on the GPU.
-- [x] Create a sdf texture each frame for all fluids and use it to drive the visual effect. 
-- [x] Multiple clouds.
-- [x] Sky background.
-- [x] Crash logger and send out a build for testing. 
+- Have a playable demo where the intended player controls are implemented and one can gauge the "funnyness" of the movement.  
 
----------------
-# TODO list:
+## TODO list for current milestone:
 
 - [x] Look over the Frame In Flight fences as the tutroial I followed was wrong. 
 - [x] Look over all resources that are using frame in flight and remove uneccessary uses. 
@@ -27,8 +13,16 @@
 - [x] Angelscript, implement the language server protocol for SyntaxHighlighting in VS-Code.
 - [x] Angelscript, send error messages on Angelscript compilation fail and Engine registered resources.
 - [x] AngelScript creates a Capability base class.
-- [] Hook up Tick-Graph with created capabilities.
-- [] Create a ECS or GO structure to manage Capabilities and GamePlay systems.
+- [x] Hook up Tick-Graph with created capabilities.
+- [x] Create a ECS or GO structure to manage Capabilities and GamePlay systems.
+- [x] Create a basic PhysicSolver to support gameplay functionality.
+- [] Angelscript, create a CreateComponent_XYZ function and system in the script manager. So this will be reflection of Angelscript data to drive gameplay systems.
+- [] Query physics state functions from the physics system and expose this to AngelScript.
+- [] First movement gameplay prototype.
+
+
+### Unsorted tasks
+
 - [] Hook up ImGui with functionPtrs from Gamethread instead of HandMade registry.
 - [] Angelscript, replace std::string with our own string class, register string to the type registry.
 - [] Angelscript, improve hot reloading and make hotreloading when changing dependency files.
@@ -36,44 +30,19 @@
 - [] Fix broken reloading of GPU resources and then remake hot reloading.
 - [] Shader include gets updated, update all shaders that depends on it, so shader dependency tracking. 
 - [] Improve RadixSort to use a proper reduction for the shuffle step. 
-
-### Unsorted tasks
-
 - [] Memory allocators & memory pool (check out the Arena memory allocator strategy).
 - [] Red-black tree and hashmap.
-- [x] Improve growing array.
-- [x] Long string class.
-- [x] Text render commands.
-- [x] Font rendering.
-- [x] Make asserts and error Handling.
-- [x] Update the input handler and create an input to action map.
 - [] Threaded loading, make it safe to load from game thread.
 - [] Animation system for 2D animations.
 - [] Profiling and a profiler window.
 - [] Imgui Dockable.
 - [] Serialize the resource registry in to a manifest so that resources does not get hotreloaded when in a new environment.
-- [x] Use material system to take control over render styles and add blending.
-- [x] Shader owned by material Instances
 - [] Configurable rendering, so start of a render graph.
-- [x] Compute shader support
 - [] Implement Mip-Mapping.
-- [] Implement a File watcher.
+- [] Implement a File watcher and update Angelscript Hotreloading logic.
 - [] Make resource registry thread safe, could be done by locking it on write operations and waiting on read.
-- [x] 2D camera for the 2D rendering.
 - [] Resource registration Init Check if current path does not match the meta resource project path, and make a function to clean that up.
-- [x] Implement batch rendering of sprites and fonts.
 - [] Spline objects.
-- [x] Implement VMA on the Vulkan backend.
-- [x] VMA implement texture support.
-- [x] Angelscript, implement array.
-- [x] Angelscript, add debugging support in VS code.
-- [x] Angelscript, implement the input handler and debug commands to the scripts.
-- [x] Angelscript, implement the language server protocol for SyntaxHighlighting in VS-Code.
-- [x] Angelscript, send error messages on Angelscript compilation fail and Engine registered resources.
-- [x] Context upload once function.
-- [x] Context, move over rendering and state functions to the context.
-- [x] Depth Sorting of sprite and text commands.
-- [x] Explicit setting of Framebuffer bind state through the context object. Make materials transition have a bind state that is not set at Init.
 - [] Shader include gets updated, update all shaders that depends on it. 
 - [] Bindless resources.
 - [] RawInput instead of Windows input.
@@ -92,3 +61,43 @@ Iterators for for-each loops on all container types
 
 ## Known bugs:
 Compound glyphs can get the wrong horizontal alignment, repo case, Roboto-Medium ':'
+
+
+### Completed tasks: 
+
+- [x] Text render commands.
+- [x] Depth Sorting of sprite and text commands.
+- [x] Implement batch rendering of sprites and fonts.
+- [x] Cloud rendering experiment of a point cloud dataset.
+- [x] First draft Update cloud point data as a fluid for dynamic clouds.
+- [x] Rewrite the fluid solver not after Sebastians video (Coding Adventure: Simulating Fluids) but this paper: Smoothed Particle Hydrodynamics. Techniques for the Physics Based Simulation of Fluids and Solids.
+- [x] Compute shader support.
+- [x] Texture views to have read only, write only and read write access to textures (might need to add memory barriers for the reading).
+- [x] Sorting with a compute shader.
+- [x] liquid simulation on the GPU.
+- [x] Create a sdf texture each frame for all fluids and use it to drive the visual effect. 
+- [x] Multiple clouds.
+- [x] Sky background.
+- [x] Crash logger and send out a build for engine testing on several devices. 
+- [x] Implement VMA on the Vulkan backend.
+- [x] VMA implement texture support.
+- [x] Angelscript, implement array.
+- [x] Angelscript, add debugging support in VS code.
+- [x] Angelscript, implement the input handler and debug commands to the scripts.
+- [x] Angelscript, implement the language server protocol for SyntaxHighlighting in VS-Code.
+- [x] Angelscript, send error messages on Angelscript compilation fail and Engine registered resources.
+- [x] Context upload once function.
+- [x] Context, move over rendering and state functions to the context.
+- [x] Depth Sorting of sprite and text commands.
+- [x] Explicit setting of Framebuffer bind state through the context object. Make materials transition have a bind state that is not set at Init.
+- [x] 2D camera for the 2D rendering.
+- [x] Implement batch rendering of sprites and fonts.
+- [x] Compute shader support
+- [x] Shader owned by material Instances
+- [x] Use material system to take control over render styles and add blending.
+- [x] Improve growing array.
+- [x] Long string class.
+- [x] Text render commands.
+- [x] Font rendering.
+- [x] Make asserts and error Handling.
+- [x] Update the input handler and create an input to action map.

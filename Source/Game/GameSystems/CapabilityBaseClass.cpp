@@ -1,20 +1,24 @@
 #include "Game_PCH.h"
 #include "CapabilityBaseClass.h"
+#include "ScriptManager.h"
 
 #include "angelscript.h"
-#include "Engine/Angelscript/TypeRegistry.h"
-#include "Engine/Angelscript/DebuggerTypes.h"
-#include "Engine/Angelscript/Debugger.h"
+#include "Angelscript/TypeRegistry.h"
+#include "Angelscript/DebuggerTypes.h"
+#include "Angelscript/Debugger.h"
+
+#include "EntityManager.h"
 
 namespace Hail
 {
+    static uint32 g_capabilityIdCounter = 0u;
     AngelScript::TypeRegistry* g_pTypeRegistry = nullptr;
     AngelScript::Variable GetScriptCapabilityVariableData(void* pObj)
     {
         Capability* pCapability = (Capability*)pObj;
-        AngelScript::Variable variableToReturn = AngelScript::ASTypeToVariable(pCapability->m_pObj, pCapability->m_pObj->GetTypeId(), 1, g_pTypeRegistry->GetEngine(), g_pTypeRegistry);
+        AngelScript::Variable variableToReturn = AngelScript::ASTypeToVariable(pCapability->GetObject(), pCapability->GetObject()->GetTypeId(), 1, g_pTypeRegistry->GetEngine(), g_pTypeRegistry);
         variableToReturn.m_value = StringL("");
-        variableToReturn.m_type = AngelScript::RemoveTypeInformationFromDeclaration(pCapability->m_pObj->GetObjectType()->GetPropertyDeclaration(0));
+        variableToReturn.m_type = AngelScript::RemoveTypeInformationFromDeclaration(pCapability->GetObject()->GetObjectType()->GetPropertyDeclaration(0));
 
         return variableToReturn;
     }
@@ -24,7 +28,7 @@ namespace Hail
         return "EngineScripts/Capability.as";
     }
 
-    void RegisterCapability(AngelScript::TypeRegistry* pTypeRegistry)
+    void Capability::RegisterAngelscriptFunctions(AngelScript::TypeRegistry* pTypeRegistry)
     {
         g_pTypeRegistry = pTypeRegistry;
 
@@ -62,26 +66,24 @@ namespace Hail
         H_ASSERT(bResult, "Failed to register Capability func");
 
 
-        bResult = pTypeRegistry->RegisterClassMethod("Capability_t", { "Setup", "void" }, { }, asMETHOD(Capability, Setup), H_FILE_LINE);
+        bResult = pTypeRegistry->RegisterClassMethod("Capability_t", { "Setup", "void" }, { }, asMETHOD(Capability, Setup), asCALL_THISCALL, H_FILE_LINE);
         H_ASSERT(bResult, "Failed to register Capability func");
-        bResult = pTypeRegistry->RegisterClassMethod("Capability_t", { "LateSetup", "void" }, { }, asMETHOD(Capability, LateSetup), H_FILE_LINE);
+        bResult = pTypeRegistry->RegisterClassMethod("Capability_t", { "LateSetup", "void" }, { }, asMETHOD(Capability, LateSetup), asCALL_THISCALL, H_FILE_LINE);
         H_ASSERT(bResult, "Failed to register Capability func");
-        bResult = pTypeRegistry->RegisterClassMethod("Capability_t", { "OnOwnerDestroyed", "void" }, { }, asMETHOD(Capability, OnOwnerDestroyed), H_FILE_LINE);
+        bResult = pTypeRegistry->RegisterClassMethod("Capability_t", { "OnOwnerDestroyed", "void" }, { }, asMETHOD(Capability, OnOwnerDestroyed), asCALL_THISCALL, H_FILE_LINE);
         H_ASSERT(bResult, "Failed to register Capability func");
-        bResult = pTypeRegistry->RegisterClassMethod("Capability_t", { "ShouldActivate", "bool" }, { }, asMETHOD(Capability, ShouldActivate), H_FILE_LINE);
+        bResult = pTypeRegistry->RegisterClassMethod("Capability_t", { "ShouldActivate", "bool" }, { }, asMETHOD(Capability, ShouldActivate), asCALL_THISCALL, H_FILE_LINE);
         H_ASSERT(bResult, "Failed to register Capability func");
-        bResult = pTypeRegistry->RegisterClassMethod("Capability_t", { "ShouldDeactivate", "bool" }, { }, asMETHOD(Capability, ShouldDeactivate), H_FILE_LINE);
+        bResult = pTypeRegistry->RegisterClassMethod("Capability_t", { "ShouldDeactivate", "bool" }, { }, asMETHOD(Capability, ShouldDeactivate), asCALL_THISCALL, H_FILE_LINE);
         H_ASSERT(bResult, "Failed to register Capability func");
-        bResult = pTypeRegistry->RegisterClassMethod("Capability_t", { "TickActive", "void" }, { { "deltaTime", "float" } }, asMETHODPR(Capability, TickActive, (float), void), H_FILE_LINE);
+        bResult = pTypeRegistry->RegisterClassMethod("Capability_t", { "TickActive", "void" }, { { "deltaTime", "float" } }, asMETHODPR(Capability, TickActive, (float), void), asCALL_THISCALL, H_FILE_LINE);
         H_ASSERT(bResult, "Failed to register Capability func");
-        bResult = pTypeRegistry->RegisterClassMethod("Capability_t", { "TickInactive", "void" }, { { "deltaTime", "float" } }, asMETHODPR(Capability, TickInactive, (float), void), H_FILE_LINE);
+        bResult = pTypeRegistry->RegisterClassMethod("Capability_t", { "TickInactive", "void" }, { { "deltaTime", "float" } }, asMETHODPR(Capability, TickInactive, (float), void), asCALL_THISCALL, H_FILE_LINE);
         H_ASSERT(bResult, "Failed to register Capability func");
-        bResult = pTypeRegistry->RegisterClassMethod("Capability_t", { "OnActivated", "void" }, { }, asMETHOD(Capability, OnActivated), H_FILE_LINE);
+        bResult = pTypeRegistry->RegisterClassMethod("Capability_t", { "OnActivated", "void" }, { }, asMETHOD(Capability, OnActivated), asCALL_THISCALL, H_FILE_LINE);
         H_ASSERT(bResult, "Failed to register Capability func");
-        bResult = pTypeRegistry->RegisterClassMethod("Capability_t", { "OnDeactivated", "void" }, { }, asMETHOD(Capability, OnDeactivated), H_FILE_LINE);
+        bResult = pTypeRegistry->RegisterClassMethod("Capability_t", { "OnDeactivated", "void" }, { }, asMETHOD(Capability, OnDeactivated), asCALL_THISCALL, H_FILE_LINE);
         H_ASSERT(bResult, "Failed to register Capability func");
-
-
 
         bResult = pTypeRegistry->RegisterClassObjectMember("Capability_t", { "m_bActive", "bool" }, asOFFSET(Capability, m_bActive), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Vec2 func");
         H_ASSERT(bResult, "Failed to register Capability member");
@@ -97,6 +99,8 @@ namespace Hail
         H_ASSERT(bResult, "Failed to register Capability member");
         bResult = pTypeRegistry->RegisterClassObjectMember("Capability_t", { "m_subGroup", "ECapabilityTickSubGroup" }, asOFFSET(Capability, m_subGroup), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Vec2 func");
         H_ASSERT(bResult, "Failed to register Capability member");
+        bResult = pTypeRegistry->RegisterClassObjectMember("Capability_t", { "m_owningEntityId", "uint" }, asOFFSET(Capability, m_owningEntityId), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Vec2 func");
+        H_ASSERT(bResult, "Failed to register Capability member");
     }
 
     Capability::Capability(asIScriptObject* obj) : 
@@ -109,12 +113,13 @@ namespace Hail
         m_subGroup(ECapabilityTickSubGroup::Normal),
         m_pObj(0), 
         m_pIsDead(0), 
-        m_refCount(1)
+        m_refCount(1),
+        m_owningEntityId(MAX_UINT),
+        m_id(g_capabilityIdCounter++)
     {
         // Get the weak ref flag for the script object to avoid holding a strong reference to the script class
         m_pIsDead = obj->GetWeakRefFlag();
         m_pIsDead->AddRef();
-
         m_pObj = obj;
     }
 
@@ -124,22 +129,40 @@ namespace Hail
         m_pIsDead->Release();
     }
 
+    const char* Capability::GetCapabilityName() const
+    {
+        H_ASSERT(m_pObj);
+        asITypeInfo* type = m_pObj->GetObjectType();
+        return type->GetName();
+    }
+
     asIScriptContext* Capability::CallInternalObjectFunction(const char* functionName, const char* functionFullType, float* pFloatArgument) const
     {
         // If the script side is still alive, then call the scripted function
         if (!m_pIsDead->Get())
         {
+            // Check that it isn't our script class instance that is makng the call, in 
+            // which case we do not callback to the script to avoid endless recursiveness
             asIScriptContext* ctx = asGetActiveContext();
             asIScriptFunction* func = ctx ? ctx->GetFunction(0) : 0;
-            if (!func || StringCompare(func->GetName(), functionName) || !ctx || ctx->GetThisPointer(0) != m_pObj)
+            const bool bSciptClassInstanceNotMakingTheCall = !func || StringCompare(func->GetName(), functionName) != true || !ctx || ctx->GetThisPointer(0) != m_pObj;
+            if (bSciptClassInstanceNotMakingTheCall)
             {
                 // Call the script function CallMe so the script can provide the overloaded behavior
                 asIScriptEngine* engine = m_pObj->GetEngine();
                 ctx = engine->RequestContext();
                 
+
+                // Get the actual virtual method (the overridden version in the script, if it exists)
+                asIScriptFunction* pVirtualFunc = m_pObj->GetObjectType()->GetMethodByDecl(functionFullType, true);
+                // Get the non-virtual method (the base class/parent implementation)
+                asIScriptFunction* pNonVirtualFunc = m_pObj->GetObjectType()->GetMethodByDecl(functionFullType, false);
+
                 // GetMethodByDecl returns the virtual function on the script class
                 // thus when calling it, the VM will execute the derived method
-                ctx->Prepare(m_pObj->GetObjectType()->GetMethodByDecl(functionFullType));
+                asIScriptFunction* pScriptFunc = pVirtualFunc ? pVirtualFunc : pNonVirtualFunc; // m_pObj->GetObjectType()->GetMethodByDecl(functionFullType);
+                H_ASSERT(pScriptFunc, "No script function implemented matching function call.");
+                ctx->Prepare(pScriptFunc);
                 ctx->SetObject(m_pObj);
                 if (pFloatArgument)
                 {
@@ -158,7 +181,6 @@ namespace Hail
         return nullptr;
     }
 
-    // TODO: Fill in functions
     void Capability::Setup()
     {
         asIScriptContext* pCtx = CallInternalObjectFunction("Setup", "void Setup()");
@@ -184,7 +206,7 @@ namespace Hail
 
     bool Capability::ShouldActivate() const
     {
-        asIScriptContext* pCtx = CallInternalObjectFunction("ShouldActivate", "void ShouldActivate()");
+        asIScriptContext* pCtx = CallInternalObjectFunction("ShouldActivate", "bool ShouldActivate()");
         if (pCtx)
         {
             const bool bScriptResult = (bool)pCtx->GetReturnByte();
@@ -196,7 +218,7 @@ namespace Hail
 
     bool Capability::ShouldDeactivate() const
     {
-        asIScriptContext* pCtx = CallInternalObjectFunction("ShouldDeactivate", "void ShouldDeactivate()");
+        asIScriptContext* pCtx = CallInternalObjectFunction("ShouldDeactivate", "bool ShouldDeactivate()");
         if (pCtx)
         {
             const bool bScriptResult = (bool)pCtx->GetReturnByte();
@@ -242,6 +264,11 @@ namespace Hail
         }
     }
 
+    float Capability::GetTimeDilation() const
+    {
+        return 0.0f;
+    }
+
     Capability* Capability::Factory()
 	{
         asIScriptContext* ctx = asGetActiveContext();
@@ -258,18 +285,23 @@ namespace Hail
         // class can be linked with the Capability script class
         asIScriptObject* obj = reinterpret_cast<asIScriptObject*>(ctx->GetThisPointer(0));
 
-        // To get the name of the Capability: 
-        /*
-        asITypeInfo* type = obj->GetObjectType();
-        const char* objeName = type->GetName();
-        */
-        return new Capability(obj);
+        Capability* pCapability = new Capability(obj);
+
+        obj->SetUserData(pCapability, (uint32)ERegisteredAngelScriptClasses::Capability);
+
+        return pCapability;
 	}
+
+    void Capability::SetOwningEntity(const Entity& entity)
+    {
+        H_ASSERT(m_owningEntityId == MAX_UINT);
+        m_owningEntityId = entity.GetId();
+    }
 
     void Capability::AddRef()
     {
+        H_DEBUGMESSAGE(StringL::Format("Capability::AddRef %p ref=%d\n", this, m_refCount + 1 ));
         m_refCount++;
-
         // Increment also the reference counter to the script side so
         // it isn't accidentally destroyed before the C++ side
         if (!m_pIsDead->Get())
@@ -278,16 +310,12 @@ namespace Hail
 
     void Capability::Release()
     {
+        H_DEBUGMESSAGE(StringL::Format("Capability::Release %p ref=%d\n", this, m_refCount - 1));
         // Release the script instance too
         if (!m_pIsDead->Get())
             m_pObj->Release();
-
-        if (--m_refCount == 0)
-        {
-            delete this;
-        }
+        m_refCount--;
     }
-
 }
 
 

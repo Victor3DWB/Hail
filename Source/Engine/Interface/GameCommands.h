@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/CommandsCommon.h"
+#include "CommandsCommon.h"
 
 namespace Hail
 {

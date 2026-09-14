@@ -5,37 +5,37 @@
 namespace Hail
 {
 	void CapabilityTickLinkedElement::Tick(float DeltaTime)
-	{
-		if (!pCapability->m_bDidLateSetup)
+	{ 
+		if (!m_pCapability->m_bDidLateSetup)
 		{
-			pCapability->m_bDidLateSetup = true;
-			pCapability->LateSetup();
+			m_pCapability->m_bDidLateSetup = true;
+			m_pCapability->LateSetup();
 		}
 
-		if (!pCapability->m_bActive && pCapability->ShouldActivate())
+		if (!m_pCapability->m_bActive && m_pCapability->ShouldActivate())
 		{
-			pCapability->m_bActive = true;
-			pCapability->m_activeDuration = 0.0;
-			pCapability->m_inactiveDuration = 0.0;
-			pCapability->OnActivated();
+			m_pCapability->m_bActive = true;
+			m_pCapability->m_activeDuration = 0.0;
+			m_pCapability->m_inactiveDuration = 0.0;
+			m_pCapability->OnActivated();
 		}
-		else if (pCapability->m_bActive && pCapability->ShouldDeactivate())
+		else if (m_pCapability->m_bActive && m_pCapability->ShouldDeactivate())
 		{
-			pCapability->m_bActive = false;
-			pCapability->m_activeDuration = 0.0;
-			pCapability->m_inactiveDuration = 0.0;
-			pCapability->OnDeactivated();
+			m_pCapability->m_bActive = false;
+			m_pCapability->m_activeDuration = 0.0;
+			m_pCapability->m_inactiveDuration = 0.0;
+			m_pCapability->OnDeactivated();
 		}
 
-		if (pCapability->m_bActive)
+		if (m_pCapability->m_bActive)
 		{
-			pCapability->TickActive(DeltaTime * pCapability->GetTimeDilation());
-			pCapability->m_activeDuration += DeltaTime * pCapability->GetTimeDilation();
+			m_pCapability->TickActive(DeltaTime * m_pCapability->GetTimeDilation());
+			m_pCapability->m_activeDuration += DeltaTime * m_pCapability->GetTimeDilation();
 		}
 		else
 		{
-			pCapability->TickInactive(DeltaTime * pCapability->GetTimeDilation());
-			pCapability->m_inactiveDuration += DeltaTime * pCapability->GetTimeDilation();
+			m_pCapability->TickInactive(DeltaTime * m_pCapability->GetTimeDilation());
+			m_pCapability->m_inactiveDuration += DeltaTime * m_pCapability->GetTimeDilation();
 		}
 	}
 
@@ -48,8 +48,8 @@ namespace Hail
 
 	void CapabilityTickLinkedElement::Unregister()
 	{
-		assert(pWorld != nullptr);
-
+		H_ASSERT(m_pWorld != nullptr);
+		*this = CapabilityTickLinkedElement();
 	}
 
 	// ---
@@ -63,9 +63,9 @@ namespace Hail
 		/* partition */
 		while (i <= j)
 		{
-			while ((*aArray)[i]->Sortable < pivot->Sortable)
+			while ((*aArray)[i]->m_sortable < pivot->m_sortable)
 				i++;
-			while ((*aArray)[j]->Sortable > pivot->Sortable)
+			while ((*aArray)[j]->m_sortable > pivot->m_sortable)
 				j--;
 
 			if (i <= j) {
@@ -90,68 +90,68 @@ namespace Hail
 
 	void CapabilityTickLinkedList::TickAll(float DeltaTime)
 	{
-		if (ElementsToAdd.Size() > 0)
+		if (m_elementsToAdd.Size() > 0)
 		{
 			// insert new elements while ticking
-			if (ElementsToAdd.Size() > 1)
-				SortWithQuick(&ElementsToAdd, 0, (uint8_t)ElementsToAdd.Size() - 1);
+			if (m_elementsToAdd.Size() > 1)
+				SortWithQuick(&m_elementsToAdd, 0, (uint8_t)m_elementsToAdd.Size() - 1);
 			size_t AddNextIndex = 0;
-			size_t NumThingsToAdd = ElementsToAdd.Size();
+			size_t NumThingsToAdd = m_elementsToAdd.Size();
 
-			CapabilityTickLinkedElement* pCurrentElement = pFirstElement;
+			CapabilityTickLinkedElement* pCurrentElement = m_pFirstElement;
 			do
 			{
 				// we're first
 				if (pCurrentElement == nullptr)
 				{
-					pFirstElement = ElementsToAdd[AddNextIndex++];
-					pCurrentElement = pFirstElement;
+					m_pFirstElement = m_elementsToAdd[AddNextIndex++];
+					pCurrentElement = m_pFirstElement;
 				}
 
 				// we're last
 				const bool bAnythingLeftToAdd = AddNextIndex < NumThingsToAdd;
-				if (bAnythingLeftToAdd && pCurrentElement->pNext == nullptr)
+				if (bAnythingLeftToAdd && pCurrentElement->m_pNext == nullptr)
 				{
-					CapabilityTickLinkedElement* ToInsert = ElementsToAdd[AddNextIndex++];
-					pCurrentElement->pNext = ToInsert;
-					ToInsert->pPrevious = pCurrentElement;
-					pLastElement = ToInsert;
+					CapabilityTickLinkedElement* ToInsert = m_elementsToAdd[AddNextIndex++];
+					pCurrentElement->m_pNext = ToInsert;
+					ToInsert->m_pPrevious = pCurrentElement;
+					m_pLastElement = ToInsert;
 				}
-				else if (bAnythingLeftToAdd && ElementsToAdd[AddNextIndex]->Sortable < pCurrentElement->Sortable)
+				else if (bAnythingLeftToAdd && m_elementsToAdd[AddNextIndex]->m_sortable < pCurrentElement->m_sortable)
 				{
-					CapabilityTickLinkedElement* ToInsert = ElementsToAdd[AddNextIndex++];
-					CapabilityTickLinkedElement* pPrevious = pCurrentElement->pPrevious;
+					CapabilityTickLinkedElement* ToInsert = m_elementsToAdd[AddNextIndex++];
+					CapabilityTickLinkedElement* pPrevious = pCurrentElement->m_pPrevious;
 					if (pPrevious != nullptr)
 					{
-						pPrevious->pNext = ToInsert;
-						ToInsert->pPrevious = pPrevious;
+						pPrevious->m_pNext = ToInsert;
+						ToInsert->m_pPrevious = pPrevious;
 					}
-					pCurrentElement->pPrevious = ToInsert;
-					ToInsert->pNext = pCurrentElement;
+					pCurrentElement->m_pPrevious = ToInsert;
+					ToInsert->m_pNext = pCurrentElement;
 					pCurrentElement = ToInsert;
 				}
 
 				pCurrentElement->Tick(DeltaTime);
-				pCurrentElement = pCurrentElement->pNext;
+				pCurrentElement = pCurrentElement->m_pNext;
 			} while (pCurrentElement != nullptr);
 
-			ElementsToAdd.RemoveAll();
+			m_elementsToAdd.RemoveAll();
 		}
 		else
 		{
 			// tick normally
-			CapabilityTickLinkedElement* pCurrentElement = pFirstElement;
+			CapabilityTickLinkedElement* pCurrentElement = m_pFirstElement;
 			while (pCurrentElement != nullptr)
 			{
 				pCurrentElement->Tick(DeltaTime);
-				pCurrentElement = pCurrentElement->pNext;
+				pCurrentElement = pCurrentElement->m_pNext;
 			}
 		}
 	}
 
 	void CapabilityTickLinkedList::Add(CapabilityTickLinkedElement& pTicker)
 	{
-		ElementsToAdd.Add(&pTicker);
+		m_elementsToAdd.Add(&pTicker);
 	}
 
 	// ---
@@ -162,36 +162,101 @@ namespace Hail
 
 	void CapabilityTickWorld::Init()
 	{
-		CapabilityElements.Prepare(1024);
-		for (int i = 0; i < TickLists.Getsize(); ++i)
+		m_capabilityElements.Prepare(1024);
+		for (int i = 0; i < m_tickLists.Getsize(); ++i)
 		{
-			TickLists[i].ElementsToAdd.Prepare(256);
+			m_tickLists[i].m_elementsToAdd.Prepare(256);
 		}
 	}
 
 	void CapabilityTickWorld::RegisterCapability(Capability& pCapability)
 	{
-		CapabilityTickLinkedElement NewElement;
-		NewElement.pCapability = &pCapability;
-		NewElement.pWorld = this;
-		NewElement.Sortable.Group = pCapability.m_group;
-		NewElement.Sortable.SubGroup = pCapability.m_subGroup;
-		CapabilityElements.Add(NewElement);
-		RegisterTicker(CapabilityElements.GetLast());
+		CapabilityTickLinkedElement newElement;
+		newElement.m_pCapability = &pCapability;
+		newElement.m_pWorld = this;
+		newElement.m_sortable.m_group = pCapability.m_group;
+		newElement.m_sortable.m_subGroup = pCapability.m_subGroup;
+
+		if (m_freeCapabilityElementSlots.Size() > 0)
+		{
+			uint32 nextElementIndex = m_freeCapabilityElementSlots[0];
+			m_freeCapabilityElementSlots.RemoveCyclicAtIndex(0);
+			m_capabilityElements[nextElementIndex] = newElement;
+			RegisterTicker(m_capabilityElements[nextElementIndex]);
+		}
+		else
+		{
+			m_capabilityElements.Add(newElement);
+			RegisterTicker(m_capabilityElements.GetLast());
+		}
 		pCapability.Setup();
+	}
+
+	void CapabilityTickWorld::UnRegisterCapability(Capability* pCapability)
+	{
+		for ( uint32 iCapabilityTicker = 0; iCapabilityTicker < m_capabilityElements.Size(); ++iCapabilityTicker)
+		{
+			CapabilityTickLinkedElement& capabilityLinkedElement = m_capabilityElements[iCapabilityTicker];
+			if ( capabilityLinkedElement.m_pCapability == pCapability )
+			{
+				CapabilityTickSortable sorting = capabilityLinkedElement.GetSorting();
+				CapabilityTickLinkedList& currentTickLinkedList = m_tickLists[(uint8_t)sorting.m_group];
+				CapabilityTickLinkedElement* pCurrentElement = currentTickLinkedList.m_pFirstElement;
+				while (pCurrentElement)
+				{
+					if (pCurrentElement->m_pCapability == pCapability)
+					{
+						H_ASSERT(&capabilityLinkedElement == pCurrentElement);
+						CapabilityTickLinkedElement* pPrevious = pCurrentElement->m_pPrevious;
+						CapabilityTickLinkedElement* pNext = pCurrentElement->m_pNext;
+
+						const bool bReplaceTickListFirst = currentTickLinkedList.m_pFirstElement == pCurrentElement;
+						const bool bReplaceTickListLast = currentTickLinkedList.m_pLastElement == pCurrentElement;
+
+						if (pPrevious)
+						{
+							pPrevious->m_pNext = pNext;
+						}
+						if (pNext)
+						{
+							pNext->m_pPrevious = pPrevious;
+						}
+
+						if (bReplaceTickListFirst)
+						{
+							currentTickLinkedList.m_pFirstElement = pNext;
+						}
+						if (bReplaceTickListLast)
+						{
+							currentTickLinkedList.m_pLastElement = pPrevious;
+						}
+
+						pCurrentElement = nullptr;
+					}
+					else
+					{
+						pCurrentElement = pCurrentElement->m_pNext;
+					}
+				}
+
+				capabilityLinkedElement.Unregister();
+				m_freeCapabilityElementSlots.Add(iCapabilityTicker);
+				break;
+			}
+		}
 	}
 
 	void CapabilityTickWorld::RegisterTicker(CapabilityTickLinkedElement& Ticker)
 	{
-		CapabilityTickSortable Sorting = Ticker.GetSorting();
-		TickLists[(uint8_t)Sorting.Group].Add(Ticker);
+		CapabilityTickSortable sorting = Ticker.GetSorting();
+		m_tickLists[(uint8_t)sorting.m_group].Add(Ticker);
 	}
 
 	void CapabilityTickWorld::Tick(float DeltaTime)
 	{
-		for (int i = 0; i < TickLists.Getsize(); ++i)
+		for (int i = 0; i < m_tickLists.Getsize(); ++i)
 		{
-			TickLists[i].TickAll(DeltaTime);
+			m_tickLists[i].TickAll(DeltaTime);
 		}
 	}
 }

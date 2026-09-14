@@ -21,11 +21,9 @@ project "Game"
 		"%{dirs.srcdir}/Game/**.cpp",
 	}
 
-
 	includedirs {
-		".",
-		"./**",
-		"%{dirs.srcdir}",
+		"%{dirs.srcdir}/Engine",
+		"%{dirs.srcdir}/Game",
 		"%{dirs.srcdir}/Shared/",
 		"%{dirs.extdir}/AngelScript/include/"
 	}
@@ -41,7 +39,7 @@ project "Game"
 		"ReflectionCodeGenerator",
 		"Shared"
 		 }
- 	filter { "configurations:Debug" }
+	filter { "configurations:Debug" }
 	 	links { 
 			"angelscript64d"
 			 }

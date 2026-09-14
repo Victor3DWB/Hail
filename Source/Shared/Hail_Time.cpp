@@ -1,6 +1,6 @@
 #include "Shared_PCH.h"
 #include "Hail_Time.h"
-#include "InternalMessageHandling.h"
+#include "InternalMessageHandling/InternalMessageHandling.h"
 
 Hail::Timer* g_globalTimer = nullptr;
 

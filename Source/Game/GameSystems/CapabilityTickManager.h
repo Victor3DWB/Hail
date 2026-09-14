@@ -3,22 +3,20 @@
 #include "Containers/GrowingArray/GrowingArray.h"
 #include "Containers/StaticArray/StaticArray.h"
 
-
 namespace Hail
 {
-
     struct CapabilityTickSortable
     {
-        ECapabilityTickGroup Group = ECapabilityTickGroup::Gameplay;
-        ECapabilityTickSubGroup SubGroup = ECapabilityTickSubGroup::Normal;
+        ECapabilityTickGroup m_group = ECapabilityTickGroup::Gameplay;
+        ECapabilityTickSubGroup m_subGroup = ECapabilityTickSubGroup::Normal;
 
         bool operator <(const CapabilityTickSortable& Right) const
         {
-            if ((int)Group < (int)Right.Group)
+            if ((int)m_group < (int)Right.m_group)
                 return true;
-            if ((int)Group > (int)Right.Group)
+            if ((int)m_group > (int)Right.m_group)
                 return false;
-            if ((int)SubGroup < (int)Right.SubGroup)
+            if ((int)m_subGroup < (int)Right.m_subGroup)
                 return true;
             /*if ((int)SubGroup > (int)Right.SubGroup)
                 return false;*/
@@ -38,7 +36,7 @@ namespace Hail
     class CapabilityTickLinkedElement
     {
     public:
-        CapabilityTickLinkedElement() {};
+        CapabilityTickLinkedElement() = default;
 
         void Tick(float DeltaTime);
 
@@ -47,24 +45,24 @@ namespace Hail
 
         void SetSorting(CapabilityTickSortable NewSorting)
         {
-            Sortable = NewSorting;
+            m_sortable = NewSorting;
         }
 
         bool GetIsRegistered() const
         {
-            return pWorld != nullptr;
+            return m_pWorld != nullptr;
         }
 
         CapabilityTickSortable GetSorting() const
         {
-            return Sortable;
+            return m_sortable;
         }
 
-        CapabilityTickSortable Sortable;
-        Capability* pCapability = nullptr;
-        CapabilityTickWorld* pWorld = nullptr;
-        CapabilityTickLinkedElement* pPrevious = nullptr;
-        CapabilityTickLinkedElement* pNext = nullptr;
+        CapabilityTickSortable m_sortable;
+        Capability* m_pCapability = nullptr;
+        CapabilityTickWorld* m_pWorld = nullptr;
+        CapabilityTickLinkedElement* m_pPrevious = nullptr;
+        CapabilityTickLinkedElement* m_pNext = nullptr;
     };
 
     // ---
@@ -77,10 +75,10 @@ namespace Hail
         void TickAll(float DeltaTime);
         void Add(CapabilityTickLinkedElement& pTicker);
 
-        CapabilityTickLinkedElement* pFirstElement = nullptr;
-        CapabilityTickLinkedElement* pLastElement = nullptr;
+        CapabilityTickLinkedElement* m_pFirstElement = nullptr;
+        CapabilityTickLinkedElement* m_pLastElement = nullptr;
 
-        GrowingArray<CapabilityTickLinkedElement*> ElementsToAdd;
+        GrowingArray<CapabilityTickLinkedElement*> m_elementsToAdd;
     };
 
     // ---
@@ -92,12 +90,14 @@ namespace Hail
 
         void Init();
         void Tick(float DeltaTime);
-        void RegisterCapability(Capability& pCapability);
+        void RegisterCapability(Capability& capability);
+        void UnRegisterCapability(Capability* pCapability);
 
     private:
         void RegisterTicker(CapabilityTickLinkedElement& Ticker);
 
-        StaticArray<CapabilityTickLinkedList, (uint8_t)ECapabilityTickGroup::Max> TickLists;
-        GrowingArray<CapabilityTickLinkedElement> CapabilityElements;
+        StaticArray<CapabilityTickLinkedList, (uint8_t)ECapabilityTickGroup::Max> m_tickLists;
+        GrowingArray<CapabilityTickLinkedElement> m_capabilityElements;
+        GrowingArray<uint32> m_freeCapabilityElementSlots;
     };
 }

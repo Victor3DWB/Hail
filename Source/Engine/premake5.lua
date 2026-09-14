@@ -23,7 +23,6 @@ project "Engine"
 	includedirs {
 		".",
 		"%{dirs.extdir}/dearimgui/",
-		"%{dirs.extdir}/AngelScript/include/",
 		"%{dirs.srcdir}",
 		"%{dirs.srcdir}/Shared/",
 		"%{dirs.srcdir}/Engine_ResourceHandling/",
@@ -35,18 +34,6 @@ project "Engine"
 		"Engine_ResourceHandling",
 		"Shared"
 		 }
-	filter { "configurations:Debug" }
-	 	links { 
-			"angelscript64d"
-			 }
-	filter { "configurations:Release" }
-		links { 
-			"angelscript64"
-			 }
-	filter { "configurations:Production" }
-		links { 
-			"angelscript64"
-			 }
 
 filter { "platforms:Windows" }
 	libdirs {

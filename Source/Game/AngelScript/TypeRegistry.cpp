@@ -1,4 +1,4 @@
-#include "Engine_PCH.h"
+#include "Game_PCH.h"
 #include "TypeRegistry.h"
 #include "angelscript.h"
 
@@ -111,7 +111,6 @@ namespace
 	}
 	StringL GetClassOperatorDeclaration(const char* typeName, AngelScript::VariableTypeData function)
 	{
-
 		StringL declaration;
 		if (function.m_bIsConst)
 		{
@@ -195,11 +194,11 @@ bool Hail::AngelScript::TypeRegistry::RegisterVariableFunction(const char* typeN
     return false;
 }
 
-bool Hail::AngelScript::TypeRegistry::RegisterClassMethod(const char* typeName, VariableTypeData function, VectorOnStack<VariableTypeData, 8u> argumentVariables, const asSFuncPtr& funcPointer, const char* sourceFileName, int line)
+bool Hail::AngelScript::TypeRegistry::RegisterClassMethod(const char* typeName, VariableTypeData function, VectorOnStack<VariableTypeData, 8u> argumentVariables, const asSFuncPtr& funcPointer, int64 callingConvention, const char* sourceFileName, int line)
 {
 	StringL declaration = GetClassMethodDefinition(function, argumentVariables);
 
-	int r = m_pScriptEngine->RegisterObjectMethod(typeName, declaration.Data(), funcPointer, asCALL_THISCALL);
+	int r = m_pScriptEngine->RegisterObjectMethod(typeName, declaration.Data(), funcPointer, callingConvention);
 
 	if (r >= 0 && m_pDebuggerRegistry)
 	{
@@ -358,7 +357,18 @@ bool Hail::AngelScript::TypeRegistry::RegisterGlobalMethod(VariableTypeData func
 {
 	//m_pScriptEngine->RegisterGlobalFunction("Vec2 GetDirectionInput(eInputAction, int)", asFUNCTION(localGetDirectionInput), asCALL_CDECL)
 	const StringL arguments = GetArgumentsFromList(argumentVariables);
-	const StringL globalFunction = StringL::Format("%s %s(%s)", function.m_type.Data(), function.m_name.Data(), arguments.Data());
+	StringL declaration;
+
+	if (function.m_bIsRef)
+	{
+		declaration = StringL::Format("%s@ %s", function.m_type, function.m_name);
+	}
+	else
+	{
+		declaration = StringL::Format("%s %s", function.m_type, function.m_name);
+	}	
+
+	const StringL globalFunction = StringL::Format("%s(%s)", declaration.Data(), arguments.Data());
 	int r = m_pScriptEngine->RegisterGlobalFunction(globalFunction.Data(), funcPointer, asCALL_CDECL);
 	if (r >= 0 && m_pDebuggerRegistry)
 	{
@@ -374,6 +384,25 @@ bool Hail::AngelScript::TypeRegistry::RegisterGlobalEnumValue(const char* name, 
 	{
 		m_pDebuggerRegistry->RegisterGlobalEnumValue(name, valueName, value, sourceFileName, line);
 	}
+	return r >= 0;
+}
+
+bool Hail::AngelScript::TypeRegistry::RegisterGlobalProperty(VariableTypeData property, void* pObjectPointer)
+{
+	StringL propertyDefinition;
+	if (property.m_bIsRef)
+	{
+		propertyDefinition = StringL::Format("%s@ %s", property.m_type, property.m_name);
+	}
+	else
+	{
+		propertyDefinition = StringL::Format("%s %s", property.m_type, property.m_name);
+	}
+	
+	int r = m_pScriptEngine->RegisterGlobalProperty(
+		propertyDefinition.Data(),
+		pObjectPointer
+	);
 	return r >= 0;
 }
 

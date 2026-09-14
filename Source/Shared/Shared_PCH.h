@@ -1,2 +1,2 @@
 #include "Utilities.h"
-#include "InternalMessageHandling.h"
+#include "InternalMessageHandling/InternalMessageHandling.h"

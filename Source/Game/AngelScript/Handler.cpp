@@ -1,4 +1,4 @@
-#include "Engine_PCH.h"
+#include "Game_PCH.h"
 #include "Handler.h"
 #include "angelscript.h"
 #include "Scriptstdstring.h"
@@ -9,7 +9,7 @@
 #include <new>
 #include "Input\InputActionList.h"
 #include "Input\InputActionMap.h"
-#include "Utility\DebugLineHelpers.h"
+#include "Interface\DebugLineHelpers.h"
 #include "ThreadSynchronizer.h"
 #include <string>
 
@@ -201,6 +201,7 @@ void Hail::AngelScript::Handler::RegisterGlobalMessages()
 	// Vector2
 	RegisterAngelScriptVectorType();
 
+	RegisterAngelScriptTransform2D();
 	// Math
 	RegisterScriptMath(m_pScriptEngine);
 
@@ -276,6 +277,34 @@ static Variable GetVec2VariableData(void* pObj)
 	return variableToReturn;
 }
 
+static Variable GetTransform2DVariableData(void* pObj)
+{
+	Transform2D transform = *(Transform2D*)pObj;
+
+	const glm::vec2 pos = transform.GetPosition();
+	const glm::vec2 scale = transform.GetScale();
+	const float rotation = transform.GetRotationRad();
+	Variable variableToReturn;
+	variableToReturn.m_type = "Transform2D";
+	variableToReturn.m_value = StringL::Format("m_pos : %f, %f | m_scale : %f, %f | m_rot : %f", pos.x, pos.y, scale.x, scale.y, rotation);
+
+	Variable& memberPos = variableToReturn.m_members.Add();
+	memberPos.m_name = "m_pos";
+	memberPos.m_type = "Vec2";
+	memberPos.m_value = StringL::Format("%f, %f", pos.x, pos.y);
+	Variable& memberScale = variableToReturn.m_members.Add();
+	memberScale.m_name = "m_scale";
+	memberScale.m_type = "Vec2";
+	memberScale.m_value = StringL::Format("%f, %f", scale.x, scale.y);
+
+	Variable& memberRotation = variableToReturn.m_members.Add();
+	memberRotation.m_name = "y";
+	memberRotation.m_type = "float";
+	memberRotation.m_value = StringL::Format("%f", rotation);
+
+	return variableToReturn;
+}
+
 static void Vec2DefaultConstructor(Vec2* self)
 {
 	new(self) Vec2();
@@ -342,10 +371,10 @@ void Hail::AngelScript::Handler::RegisterAngelScriptVectorType()
 	bResult = m_pTypeRegistry->RegisterClassOperatorOverload("Vec2", { "opDiv", "Vec2", true, false }, asMETHODPR(Vec2, operator/, (const Vec2&) const, Vec2), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Vec2 func");
 
 	// Register the object methods
-	bResult = m_pTypeRegistry->RegisterClassMethod("Vec2", { "Length", "float", true }, {}, asMETHOD(Vec2, Length), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Vec2 func");
-	bResult = m_pTypeRegistry->RegisterClassMethod("Vec2", { "SquaredLength", "float", true }, {}, asMETHOD(Vec2, SquaredLength), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Vec2 func");
-	bResult = m_pTypeRegistry->RegisterClassMethod("Vec2", { "GetNormalized", "Vec2", true }, {}, asMETHOD(Vec2, GetNormalized), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Vec2 func");
-	bResult = m_pTypeRegistry->RegisterClassMethod("Vec2", { "Normalize", "void" }, {}, asMETHOD(Vec2, Normalize), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Vec2 func");
+	bResult = m_pTypeRegistry->RegisterClassMethod("Vec2", { "Length", "float", true }, {}, asMETHOD(Vec2, Length), asCALL_THISCALL, H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Vec2 func");
+	bResult = m_pTypeRegistry->RegisterClassMethod("Vec2", { "SquaredLength", "float", true }, {}, asMETHOD(Vec2, SquaredLength), asCALL_THISCALL, H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Vec2 func");
+	bResult = m_pTypeRegistry->RegisterClassMethod("Vec2", { "GetNormalized", "Vec2", true }, {}, asMETHOD(Vec2, GetNormalized), asCALL_THISCALL, H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Vec2 func");
+	bResult = m_pTypeRegistry->RegisterClassMethod("Vec2", { "Normalize", "void" }, {}, asMETHOD(Vec2, Normalize), asCALL_THISCALL, H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Vec2 func");
 
 	// Register the swizzle operators
 	bResult = m_pTypeRegistry->RegisterClassGetSetter("Vec2", { "yx", "Vec2" }, asMETHOD(Vec2, YX), false, H_FILE_LINE); H_ASSERT(bResult, "Failed to register Vec2 func");
@@ -355,6 +384,71 @@ void Hail::AngelScript::Handler::RegisterAngelScriptVectorType()
 	bResult = m_pTypeRegistry->RegisterClassGetSetter("Vec2", { "y", "float" }, asMETHOD(Vec2, GetY), false, H_FILE_LINE); H_ASSERT(bResult, "Failed to register Vec2 func");
 	bResult = m_pTypeRegistry->RegisterClassGetSetter("Vec2", { "x", "float" }, asMETHOD(Vec2, SetX), true, H_FILE_LINE); H_ASSERT(bResult, "Failed to register Vec2 func");
 	bResult = m_pTypeRegistry->RegisterClassGetSetter("Vec2", { "y", "float" }, asMETHOD(Vec2, SetY), true, H_FILE_LINE); H_ASSERT(bResult, "Failed to register Vec2 func");
+}
+
+static Vec2 Transform2D_GetPosition(Transform2D* transform)
+{
+	Vec2 pos = transform->GetPosition();
+	return pos;
+}
+
+static Vec2 Transform2D_GetScale(Transform2D* transform)
+{
+	Vec2 scale = transform->GetScale();
+	return scale;
+}
+
+static void Transform2D_SetPosition(Transform2D* transform, const Vec2& pos)
+{
+	transform->SetPosition(pos.m_vec);
+}
+
+static void Transform2D_AddToPosition(Transform2D* transform, const Vec2& pos)
+{
+	transform->AddToPosition(pos.m_vec);
+}
+
+static void Transform2D_SetScale(Transform2D* transform, const Vec2& scale)
+{
+	transform->SetScale(scale.m_vec);
+}
+
+static void Transform2D_AddToScale(Transform2D* transform, const Vec2& scale)
+{
+	transform->AddToScale(scale.m_vec);
+}
+
+static void Transform2D_LookAt(Transform2D* transform, const Vec2& normalizedDirection)
+{
+	transform->LookAt(normalizedDirection.m_vec);
+}
+
+void Hail::AngelScript::Handler::RegisterAngelScriptTransform2D()
+{
+	bool bResult;
+	bResult = m_pTypeRegistry->RegisterType("Transform2D", 0, asOBJ_REF | asOBJ_NOCOUNT, H_FILE_LINE); H_ASSERT(bResult, "Failed to register Transform func");
+
+	bResult = m_pTypeRegistry->RegisterVariableFunction("Transform2D", &GetTransform2DVariableData); H_ASSERT(bResult, "Failed to register Transform func");
+
+	bResult = m_pTypeRegistry->RegisterClassMethod("Transform2D", { "GetPosition", "Vec2" }, {}, asFUNCTION(Transform2D_GetPosition), asCALL_CDECL_OBJFIRST, H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Transform func");
+	bResult = m_pTypeRegistry->RegisterClassMethod("Transform2D", { "GetScale", "Vec2" }, {}, asFUNCTION(Transform2D_GetScale), asCALL_CDECL_OBJFIRST, H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Transform func");
+	bResult = m_pTypeRegistry->RegisterClassMethod("Transform2D", { "GetRotationEuler", "float" }, {}, asMETHOD(Transform2D, GetRotationEuler), asCALL_THISCALL, H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Transform func");
+	bResult = m_pTypeRegistry->RegisterClassMethod("Transform2D", { "GetRotationRad", "float" }, {}, asMETHOD(Transform2D, GetRotationRad), asCALL_THISCALL, H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Transform func");
+
+
+	bResult = m_pTypeRegistry->RegisterClassMethod("Transform2D", { "SetPosition", "void" }, { { "in", "Vec2", true, true } }, asFUNCTION(Transform2D_SetPosition), asCALL_CDECL_OBJFIRST, H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Transform func");
+	bResult = m_pTypeRegistry->RegisterClassMethod("Transform2D", { "AddToPosition", "void" }, { { "in", "Vec2", true, true } }, asFUNCTION(Transform2D_AddToPosition), asCALL_CDECL_OBJFIRST, H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Transform func");
+	
+	bResult = m_pTypeRegistry->RegisterClassMethod("Transform2D", { "SetRotationRad", "void" }, { { "rot", "float", true } }, asMETHOD(Transform2D, SetRotationRad), asCALL_THISCALL, H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Transform func");
+	bResult = m_pTypeRegistry->RegisterClassMethod("Transform2D", { "SetRotationEuler", "void" }, { { "rot", "float", true } }, asMETHOD(Transform2D, SetRotationEuler), asCALL_THISCALL, H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Transform func");
+
+	bResult = m_pTypeRegistry->RegisterClassMethod("Transform2D", { "AddToRotationRad", "void" }, { { "rot", "float", true } }, asMETHOD(Transform2D, AddToRotationRad), asCALL_THISCALL, H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Transform func");
+	bResult = m_pTypeRegistry->RegisterClassMethod("Transform2D", { "AddToRotationEuler", "void" }, { { "rot", "float", true } }, asMETHOD(Transform2D, AddToRotationEuler), asCALL_THISCALL, H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Transform func");
+
+	bResult = m_pTypeRegistry->RegisterClassMethod("Transform2D", { "SetScale", "void" }, { { "in", "Vec2", true, true } }, asFUNCTION(Transform2D_SetScale), asCALL_CDECL_OBJFIRST, H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Transform func");
+	bResult = m_pTypeRegistry->RegisterClassMethod("Transform2D", { "AddToScale", "void" }, { { "in", "Vec2", true, true } }, asFUNCTION(Transform2D_AddToScale), asCALL_CDECL_OBJFIRST, H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Transform func");
+	
+	bResult = m_pTypeRegistry->RegisterClassMethod("Transform2D", { "LookAt", "void" }, { { "in", "Vec2", true, true } }, asFUNCTION(Transform2D_LookAt), asCALL_CDECL_OBJFIRST, H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Transform func");
 }
 
 Hail::AngelScript::Vec2::Vec2() : m_vec(0) {}

@@ -3,23 +3,28 @@
 #include "Game.h"
 
 #include <iostream>
-#include "Engine/ThreadSynchronizer.h"
-#include "Engine/RenderCommands.h"
-#include "Engine/Interface/ApplicationInitData.h"
+#include "ThreadSynchronizer.h"
+#include "RenderCommands.h"
+#include "Interface/ApplicationInitData.h"
 
 #include "Camera.h"
-#include "Engine/Input/InputActionMap.h"
+#include "Input/InputActionMap.h"
 
-#include "Engine/ImGui/ImGuiCommands.h"
-#include "Engine/ImGui/ImGuiFileBrowser.h"
+#include "ImGui/ImGuiCommands.h"
+#include "ImGui/ImGuiFileBrowser.h"
 
-#include "Engine/HailEngine.h"
-#include "Engine/ImGui/ImGuiFileBrowser.h"
+#include "HailEngine.h"
 
-#include "Engine/Interface/ResourceInterface.h"
+#include "Interface/ResourceInterface.h"
 
-#include "Utility/DebugLineHelpers.h"
+#include "Interface/DebugLineHelpers.h"
 #include "Reflection/Reflection.h"
+
+#include "GameSystems/ComponentArray.h"
+
+#include "angelscript.h"
+#include "AngelScript/Handler.h"
+
 
 namespace
 {
@@ -42,6 +47,10 @@ namespace
 	Hail::GUID spaceShipGuid;
 	Hail::GUID backgroundGuid;
 	Hail::GUID debugGridGuid;
+
+	Hail::EntityHandle g_playerHandle;
+	Hail::EntityHandle g_linePhysicsEntities[2];
+	Hail::EntityHandle g_spherePhysicsEntities[5];
 }
 
 namespace Hail
@@ -59,7 +68,22 @@ namespace Hail
 	void GameApplication::Init(void* initData)
 	{
 		ApplcationInitData* pAppInitData = (ApplcationInitData*)initData;
-		m_ScriptManager.Init(pAppInitData->m_pAsHandler, pAppInitData->m_pAsTypeRegistry);
+		m_pAsHandler = new AngelScript::Handler(pAppInitData->m_pInputSystem, pAppInitData->m_pThreadSynchronizer, true);
+
+		ScriptManager::InitParams scriptManagerInitParams;
+		scriptManagerInitParams.m_pCapabilitySystem = &m_capabilitySystem;
+		scriptManagerInitParams.m_pComponentManager = &m_componentManager;
+		scriptManagerInitParams.m_pEntityManager = &m_entityManager;
+		scriptManagerInitParams.m_pHandler = m_pAsHandler;
+		m_scriptManager.Init(scriptManagerInitParams);
+
+		m_componentManager.Init(&m_entityManager);
+
+		CapabilitySystem::CapabilitySystemInitParams capabilityInitParams;
+		capabilityInitParams.m_pEntityManager = &m_entityManager;
+		capabilityInitParams.m_pComponentManager = &m_componentManager;
+		capabilityInitParams.m_pScriptManager = &m_scriptManager;
+		m_capabilitySystem.Init(capabilityInitParams);
 
 		spaceShipGuid.m_data1 = 3698324670;
 		spaceShipGuid.m_data2 = 58616;
@@ -161,6 +185,63 @@ namespace Hail
 		g_textCommand1.color = glm::vec3(1.0, 0.120, 0.9);
 		g_textCounter.color = glm::vec3(1.0, 0.9, 0.9);
 		g_textCounterNumber.color = glm::vec3(1.0, 0.0, 0.0);
+
+
+		g_linePhysicsEntities[0] = m_entityManager.CreateEntity();
+		m_entityManager.GetEntityFromIndex(g_linePhysicsEntities[0]).m_transform.SetPosition({ 0.5f, 0.5f });
+		g_linePhysicsEntities[1] = m_entityManager.CreateEntity();
+		m_entityManager.GetEntityFromIndex(g_linePhysicsEntities[1]).m_transform.SetPosition({ 0.5f, 50.75f });
+		PhysicsCollisionProperties linePhysicsProperties;
+		linePhysicsProperties.m_mass = 0.f;
+
+		PhysicsLineData lineData;
+		lineData.m_length = 1500.4f;
+		lineData.m_rotation = Math::PIf;// + 0.914;
+		m_componentManager.AddComponentToEntity(m_entityManager.GetEntityFromIndex(g_linePhysicsEntities[0]).GetId(), EComponentType::PhysicsComponent);
+		*m_componentManager.GetPhysicsComponent(m_entityManager.GetEntityFromIndex(g_linePhysicsEntities[0]).GetId()) = m_physicsSystem.CreatePhysicsLineComponent(lineData, linePhysicsProperties);
+		lineData.m_rotation = Math::PIf;// -0.814;
+		m_componentManager.AddComponentToEntity(m_entityManager.GetEntityFromIndex(g_linePhysicsEntities[1]).GetId(), EComponentType::PhysicsComponent);
+		*m_componentManager.GetPhysicsComponent(m_entityManager.GetEntityFromIndex(g_linePhysicsEntities[1]).GetId()) = m_physicsSystem.CreatePhysicsLineComponent(lineData, linePhysicsProperties);
+
+		g_spherePhysicsEntities[0] = m_entityManager.CreateEntity();
+		m_entityManager.GetEntityFromIndex(g_spherePhysicsEntities[0]).m_transform.SetPosition({ -80.f, -350.f });
+		g_spherePhysicsEntities[1] = m_entityManager.CreateEntity();
+		m_entityManager.GetEntityFromIndex(g_spherePhysicsEntities[1]).m_transform.SetPosition({ 80.f, -350.f });
+		g_spherePhysicsEntities[2] = m_entityManager.CreateEntity();
+		m_entityManager.GetEntityFromIndex(g_spherePhysicsEntities[2]).m_transform.SetPosition({ -40.f, -100.f });
+		g_spherePhysicsEntities[3] = m_entityManager.CreateEntity();
+		m_entityManager.GetEntityFromIndex(g_spherePhysicsEntities[3]).m_transform.SetPosition({ 0.f, -100.f });
+		g_spherePhysicsEntities[4] = m_entityManager.CreateEntity();
+		m_entityManager.GetEntityFromIndex(g_spherePhysicsEntities[4]).m_transform.SetPosition({ 40.f, -100.f });
+
+		PhysicsCollisionProperties circlePhysicsProperties;
+		circlePhysicsProperties.m_mass = 10.0f;
+		PhysicsCircleData circlePhysicsData;
+		circlePhysicsData.m_radius = 20.015;
+		m_componentManager.AddComponentToEntity(m_entityManager.GetEntityFromIndex(g_spherePhysicsEntities[0]).GetId(), EComponentType::PhysicsComponent);
+		*m_componentManager.GetPhysicsComponent(m_entityManager.GetEntityFromIndex(g_spherePhysicsEntities[0]).GetId()) = m_physicsSystem.CreatePhysicsCircleComponent(circlePhysicsData, circlePhysicsProperties);
+		m_componentManager.AddComponentToEntity(m_entityManager.GetEntityFromIndex(g_spherePhysicsEntities[1]).GetId(), EComponentType::PhysicsComponent);
+		*m_componentManager.GetPhysicsComponent(m_entityManager.GetEntityFromIndex(g_spherePhysicsEntities[1]).GetId()) = m_physicsSystem.CreatePhysicsCircleComponent(circlePhysicsData, circlePhysicsProperties);
+		m_componentManager.AddComponentToEntity(m_entityManager.GetEntityFromIndex(g_spherePhysicsEntities[2]).GetId(), EComponentType::PhysicsComponent);
+		*m_componentManager.GetPhysicsComponent(m_entityManager.GetEntityFromIndex(g_spherePhysicsEntities[2]).GetId()) = m_physicsSystem.CreatePhysicsCircleComponent(circlePhysicsData, circlePhysicsProperties);
+		m_componentManager.AddComponentToEntity(m_entityManager.GetEntityFromIndex(g_spherePhysicsEntities[3]).GetId(), EComponentType::PhysicsComponent);
+		*m_componentManager.GetPhysicsComponent(m_entityManager.GetEntityFromIndex(g_spherePhysicsEntities[3]).GetId()) = m_physicsSystem.CreatePhysicsCircleComponent(circlePhysicsData, circlePhysicsProperties);
+		m_componentManager.AddComponentToEntity(m_entityManager.GetEntityFromIndex(g_spherePhysicsEntities[4]).GetId(), EComponentType::PhysicsComponent);
+		*m_componentManager.GetPhysicsComponent(m_entityManager.GetEntityFromIndex(g_spherePhysicsEntities[4]).GetId()) = m_physicsSystem.CreatePhysicsCircleComponent(circlePhysicsData, circlePhysicsProperties);
+
+		g_playerHandle = m_entityManager.CreateEntity();
+		CapabilityCreationRequest capabilityRequest;
+		capabilityRequest.m_capabilityName = "PlayerMovementCapability";
+		capabilityRequest.m_scriptFilePath = FilePath::GetAngelscriptDirectory().Data();
+		capabilityRequest.m_scriptFilePath += L"IncludeScript.as";
+		Capability* pCapability = m_scriptManager.CreateCapability(capabilityRequest);
+		if (pCapability)
+		{
+			m_capabilitySystem.RegisterCapabilityToEntity(m_entityManager.GetEntityFromIndex(g_playerHandle), pCapability);
+		}
+		m_componentManager.AddComponentToEntity(g_playerHandle, EComponentType::PhysicsComponent);
+		circlePhysicsProperties.m_mass = 0.0f;
+		*m_componentManager.GetPhysicsComponent(g_playerHandle) = m_physicsSystem.CreatePhysicsCircleComponent(circlePhysicsData, circlePhysicsProperties);
 	}
 
 	bool g_bTest = false;
@@ -170,7 +251,18 @@ namespace Hail
 
 	void GameApplication::Update(double totalTime, float deltaTime, Hail::ApplicationFrameData& recievedFrameData)
 	{
-		m_ScriptManager.Update();
+		Hail::ApplicationFrameData& frameData = recievedFrameData;
+
+		PhysicsUpdatePayload physicsUpdate;
+		physicsUpdate.m_deltaTime = deltaTime;
+		physicsUpdate.m_bShowDebugSymbols = true;
+		physicsUpdate.m_pEntityManager = &m_entityManager;
+		physicsUpdate.m_pPhysicComponents = &m_componentManager.GetPhysicsComponents();
+		physicsUpdate.p_commandPoolToFill = frameData.commandPoolToFill;
+		m_physicsSystem.UpdatePhysicsWorld(physicsUpdate);
+
+		m_scriptManager.Update(deltaTime);
+		m_capabilitySystem.Update(deltaTime);
 
 
 		if (sprites[0].materialInstanceID == MAX_UINT && Hail::ResourceInterface::GetMaterialResourceState(backgroundGuid) == eResourceState::Loaded)
@@ -188,7 +280,6 @@ namespace Hail
 				manySprites[i].materialInstanceID = Hail::ResourceInterface::GetMaterialInstanceResourceHandle(debugGridGuid);
 		}
 
-		Hail::ApplicationFrameData& frameData = recievedFrameData;
 		g_2DCamera.SetResolution(frameData.commandPoolToFill->camera2D.GetResolution());
 		//Make Gawme ^^
 		g_fTest = recievedFrameData.imguiCommandRecorder->GetResponseValue<float>(3);
@@ -327,7 +418,13 @@ namespace Hail
 
 	void GameApplication::Shutdown()
 	{
-		m_ScriptManager.Cleanup();
+		m_scriptManager.Cleanup();
+
+		if (asIScriptEngine* pScriptEngine = m_pAsHandler->GetScriptEngine())
+		{
+			pScriptEngine->ShutDownAndRelease();
+		}
+		SAFEDELETE(m_pAsHandler);
 
 		g_textCommand1.text.Clear();
 		g_textCounter.text.Clear();

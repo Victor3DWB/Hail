@@ -21,11 +21,6 @@
 #include "imgui.h"
 #include "ImGui\ImGuiCommands.h"
 
-#include "angelscript.h"
-#include "AngelScript\Handler.h"
-#include "AngelScript\Runner.h"
-#include "AngelScript\Debugger.h"
-
 #ifdef PLATFORM_WINDOWS
 
 #include "Windows/Windows_ApplicationWindow.h"
@@ -69,7 +64,6 @@ namespace Hail
 		std::thread applicationThread;
 		float applicationTickRate = 0;
 
-		AngelScript::Handler* pAsHandler;
 	};
 
 	EngineData* g_engineData = nullptr;
@@ -133,17 +127,15 @@ bool Hail::InitEngine(StartupAttributes& startupData)
 
 	g_engineData->inputActionMap.Init(g_engineData->inputHandler);
 
-	g_engineData->pAsHandler = new AngelScript::Handler(&g_engineData->inputActionMap, &g_engineData->threadSynchronizer, true);
-
 	g_engineData->applicationTickRate = (float32)startupData.applicationTickRate;
 	const float tickTime = 1.0f / g_engineData->applicationTickRate;
 	g_engineData->threadSynchronizer.Init(tickTime);
 	g_engineData->imguiCommandRecorder.Init(g_engineData->resourceManager);
 
 	ApplcationInitData appInitData;
-	appInitData.m_pAsHandler = g_engineData->pAsHandler;
-	appInitData.m_pAsTypeRegistry = g_engineData->pAsHandler->GetTypeRegistry();
+	appInitData.m_pThreadSynchronizer = &g_engineData->threadSynchronizer;
 	appInitData.m_pInputMapping = &g_engineData->inputHandler->GetInputMapping();
+	appInitData.m_pInputSystem = &g_engineData->inputActionMap;
 
 	startupData.initFunctionToCall(&appInitData); // Init the calling application
 	g_engineData->updateFunctionToCall = startupData.updateFunctionToCall;
@@ -350,9 +342,7 @@ void Hail::Cleanup()
 {
 	g_engineData->imguiCommandRecorder.DeInit();
 	g_engineData->renderer->Cleanup();
-	if (asIScriptEngine* pScriptEngine = g_engineData->pAsHandler->GetScriptEngine())
-		pScriptEngine->ShutDownAndRelease();
-	SAFEDELETE(g_engineData->pAsHandler);
+
 	SAFEDELETE(g_engineData->appWindow);
 	SAFEDELETE(g_engineData->inputHandler);
 	SAFEDELETE(g_engineData->renderer);

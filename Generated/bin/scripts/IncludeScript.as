@@ -47,16 +47,28 @@ class Foo
     Vec2 m_pos = Vec2(200.25);
 }
 
+enum EBestEnumEver
+{
+    eValue0,
+    eValue2 = 2,
+    eValue3,
+    eValue200 = eValue2 * 100
+}
+
 class PlayerMovementCapability : Capability
 {
     void Setup()
     {
-        m_bDrawCircle = true;
     }
 
     bool ShouldActivate()
     {
-        return true;
+        return m_bActiveCapability == true;
+    }
+
+    bool ShouldDeactivate()
+    {
+        return m_bActiveCapability == false;
     }
 
     void TickActive(float deltaTime)
@@ -69,31 +81,59 @@ class PlayerMovementCapability : Capability
 
         if (GetButtonInput(eInputAction::PlayerAction1, 0) == 1)
         {
-            m_bDrawCircle = !m_bDrawCircle;
+            m_bActiveCapability = false;
+            if (m_bActive)
+            {
+                Print("Still Active <3");
+                string printString = "Owning Entity ID: ";
+                printString += GetOwningEntity();
+                Print(printString);
+            }
         }
 
-        if (m_bDrawCircle)
+        if (GetButtonInput(eInputAction::PlayerMoveLeft, 0) == 2)
         {
-            DrawCircle(m_pos, m_radius);
+            m_pos.x = m_pos.x - 0.5 * movementSpeed;
         }
+        if (GetButtonInput(eInputAction::PlayerMoveRight, 0) == 2)
+        {
+            m_pos.x = m_pos.x + 0.5 * movementSpeed;
+        }
+
+        if (GetButtonInput(eInputAction::PlayerMoveUp, 0) == 2)
+        {
+            m_pos.y = m_pos.y - 0.5 * movementSpeed;
+        }
+        if (GetButtonInput(eInputAction::PlayerMoveDown, 0) == 2)
+        {
+            m_pos.y = m_pos.y + 0.5 * movementSpeed;
+        }
+
+        Transform2D@ playerTransform = GetEntityTransform(GetOwningEntity());
+        playerTransform.SetPosition(m_pos);
+        
+        DrawCircle(m_pos, m_radius);
     }
 
     void TickInactive(float deltaTime)
     {
-
+        if (GetButtonInput(eInputAction::PlayerAction2, 0) == 1)
+        {
+            m_bActiveCapability = true;
+        }
     }
 
     void OnActivated()
     {
-
+        Print("Activated player capability from C++");
     }
 
     void OnDeactivated()
     {
-
+        Print("Deactivated player capability from C++");
     }
 
     float m_radius = 10.1;
     Vec2 m_pos =  Vec2(0.0);
-    bool m_bDrawCircle = true;
+    bool m_bActiveCapability = true;
 }

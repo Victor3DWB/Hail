@@ -3,10 +3,10 @@
 
 #include "HailEngine.h"
 #include "Timer.h"
-#include "Utility\DebugLineHelpers.h"
+#include "Interface\DebugLineHelpers.h"
 #include "RenderCommands.h"
 
-#include "Utility\Sorting.h"
+#include "EngineUtility\Sorting.h"
 #include "Input\InputHandler.h"
 
 

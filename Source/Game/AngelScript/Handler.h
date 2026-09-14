@@ -67,6 +67,7 @@ namespace Hail
 			void MessageCallback(const asSMessageInfo* pMsg, void* param);
 			void RegisterGlobalMessages();
 			void RegisterAngelScriptVectorType();
+			void RegisterAngelScriptTransform2D();
 
 			const bool m_bEnableDebugger;
 			asIScriptEngine* m_pScriptEngine;

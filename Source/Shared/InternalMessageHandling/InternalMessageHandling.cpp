@@ -3,7 +3,7 @@
 #include "InternalMessageLogger.h"
 #include "Hail_Time.h"
 #include "DebugMacros.h"
-#include "StringUtility.h"
+#include "Utility/StringUtility.h"
 using namespace Hail;
 
 #ifdef DEBUG

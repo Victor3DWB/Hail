@@ -1,8 +1,8 @@
 #include "Shared_PCH.h"
 #include "ErrorHandler.h"
 #include "DebugMacros.h"
-#include "StringUtility.h"
-#include "InOutStream.h"
+#include "Utility/StringUtility.h"
+#include "Utility/InOutStream.h"
 #include "Timer.h"
 
 #ifdef PLATFORM_WINDOWS

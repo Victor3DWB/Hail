@@ -1,7 +1,7 @@
 #pragma once
 #include "Types.h"
 #include "Containers\VectorOnStack\VectorOnStack.h"
-#include "Engine/Interface/GameCommands.h"
+#include "GameCommands.h"
 
 namespace Hail
 {
