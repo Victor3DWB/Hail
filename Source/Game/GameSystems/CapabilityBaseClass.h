@@ -84,7 +84,7 @@ namespace Hail
 
         static Capability* Factory();
 
-        void SetOwningEntity(const Entity& entity);
+        void SetOwningEntity(const EntityHandle& entity);
 
         // Reference counting
         void AddRef();

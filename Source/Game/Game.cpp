@@ -237,7 +237,7 @@ namespace Hail
 		Capability* pCapability = m_scriptManager.CreateCapability(capabilityRequest);
 		if (pCapability)
 		{
-			m_capabilitySystem.RegisterCapabilityToEntity(m_entityManager.GetEntityFromIndex(g_playerHandle), pCapability);
+			m_capabilitySystem.RegisterCapabilityToEntity(g_playerHandle, pCapability);
 		}
 		m_componentManager.AddComponentToEntity(g_playerHandle, EComponentType::PhysicsComponent);
 		circlePhysicsProperties.m_mass = 0.0f;

@@ -16,9 +16,10 @@
 - [x] Hook up Tick-Graph with created capabilities.
 - [x] Create a ECS or GO structure to manage Capabilities and GamePlay systems.
 - [x] Create a basic PhysicSolver to support gameplay functionality.
-- [] Angelscript, create a CreateComponent_XYZ function and system in the script manager. So this will be reflection of Angelscript data to drive gameplay systems.
+- [x] Angelscript, create a CreateComponent_XYZ function and system in the script manager. So this will be reflection of Angelscript data to drive gameplay systems.
+- [] Drive sprites from ECS and camera from Angelscript
 - [] Query physics state functions from the physics system and expose this to AngelScript.
-- [] First movement gameplay prototype.
+- [] First movement gameplay prototype, ground and air
 
 
 ### Unsorted tasks

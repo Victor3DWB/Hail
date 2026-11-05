@@ -326,9 +326,9 @@ Hail::FilePath::FilePath(const FilePath& path, uint32_t lengthOfPath)
 
 Hail::FilePath& Hail::FilePath::operator+=(const FilePath& otherPath)
 {
-    m_object = otherPath.Object();
     if (otherPath.IsValid())
     {
+        m_object = otherPath.Object();
         if (m_isDirectory)
         {
             if (m_data[m_length - 1] == g_Wildcard)

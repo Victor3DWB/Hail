@@ -4,6 +4,9 @@
 #include "Containers\VectorOnStack\VectorOnStack.h"
 #include "Transforms.h"
 
+class asITypeInfo;
+class asIScriptObject;
+
 namespace Hail
 {
 	class Capability;
@@ -63,6 +66,14 @@ namespace Hail
 		};
 		VectorOnStack<AngelscriptCapabilityData, 8> m_capabilities;
 	};
+
+	// One entry for each created Component defined in Angelscript that an Entity registers
+	struct AngelscriptComponent
+	{
+		asIScriptObject* m_pObject;
+		uint32 m_typeId;
+	};
+
 }
 
 

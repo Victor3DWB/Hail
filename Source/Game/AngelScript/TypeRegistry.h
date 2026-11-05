@@ -142,8 +142,6 @@ namespace Hail
 			bool RegisterGlobalMethod(VariableTypeData function, VectorOnStack<VariableTypeData, 8u> argumentVariables, const asSFuncPtr& funcPointer, const char* sourceFileName, int line);
 			bool RegisterGlobalEnumValue(const char* name, const char* valueName, uint32 value, const char* sourceFileName, int line);
 
-			bool RegisterGlobalProperty(VariableTypeData property, void* pObjectPointer);
-
 			Variable GetVariableFromCallback(uint32 typeID, void* pObject);
 			asIScriptEngine* GetEngine() { return m_pScriptEngine; }
 			TypeDebuggerRegistry* GetDebuggerRegistry() { return m_pDebuggerRegistry; }

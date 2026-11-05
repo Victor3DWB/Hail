@@ -12,20 +12,15 @@ namespace Hail
 
         bool operator <(const CapabilityTickSortable& Right) const
         {
-            if ((int)m_group < (int)Right.m_group)
-                return true;
-            if ((int)m_group > (int)Right.m_group)
-                return false;
-            if ((int)m_subGroup < (int)Right.m_subGroup)
-                return true;
-            /*if ((int)SubGroup > (int)Right.SubGroup)
-                return false;*/
-            return false;
+            if (m_group != Right.m_group)
+                return m_group < Right.m_group;
+
+            return m_subGroup < Right.m_subGroup;
         }
 
         bool operator >(const CapabilityTickSortable& Right) const
         {
-            return !(*this < Right);
+            return Right < (*this);
         }
     };
 

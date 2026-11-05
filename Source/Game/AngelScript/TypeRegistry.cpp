@@ -387,25 +387,6 @@ bool Hail::AngelScript::TypeRegistry::RegisterGlobalEnumValue(const char* name, 
 	return r >= 0;
 }
 
-bool Hail::AngelScript::TypeRegistry::RegisterGlobalProperty(VariableTypeData property, void* pObjectPointer)
-{
-	StringL propertyDefinition;
-	if (property.m_bIsRef)
-	{
-		propertyDefinition = StringL::Format("%s@ %s", property.m_type, property.m_name);
-	}
-	else
-	{
-		propertyDefinition = StringL::Format("%s %s", property.m_type, property.m_name);
-	}
-	
-	int r = m_pScriptEngine->RegisterGlobalProperty(
-		propertyDefinition.Data(),
-		pObjectPointer
-	);
-	return r >= 0;
-}
-
 Hail::AngelScript::Variable Hail::AngelScript::TypeRegistry::GetVariableFromCallback(uint32 typeID, void* pObject)
 {
 	for (uint32 i = 0; i < m_registeredTypes.Size(); i++)

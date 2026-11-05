@@ -20,7 +20,7 @@ namespace Hail
 
 		uint32 GetColorPacked() const;
 		glm::vec3 GetColorVec3() const;
-		glm::vec4 GetColorWithAlpha() const;
+		glm::vec4 GetColorVec4() const;
 
 		void SetR(float colorValue);
 		void SetG(float colorValue);

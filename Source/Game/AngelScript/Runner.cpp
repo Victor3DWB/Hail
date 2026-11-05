@@ -6,6 +6,7 @@
 #include "Debugger.h"
 
 #include "GameSystems/CapabilitySystem.h"
+#include "GameSystems/ComponentManager.h"
 
 using namespace Hail;
 
@@ -17,7 +18,7 @@ void Hail::AngelScript::Runner::Init(const InitParams& initParams)
 	m_pScriptEngine = initParams.m_pScriptEngine;
 	m_pTypeRegistry = initParams.m_pTypeRegistry;
 	m_pCapabilitySystem = initParams.m_pCapabilitySystem;
-	
+	m_pComponentManager = initParams.m_pComponentManager;
 	//TODO: Disable on non debug
 	m_pDebuggerServer = new DebuggerServer(m_pTypeRegistry->GetDebuggerRegistry());
 }
@@ -165,6 +166,73 @@ void Hail::AngelScript::Runner::AddMandatoryScriptPath(const char* pSectionName,
 	if (m_pDebuggerServer)
 	{
 		m_pDebuggerServer->AddMandatoryIncludePath(pMandatoryRelativeScriptPath);
+	}
+}
+
+bool Hail::AngelScript::Runner::SetScriptDefinedComponents(const FilePath& componentFilePath)
+{
+	const char* pDisc = "ScriptComponentBuilder";
+	CScriptBuilder queryBuilder;
+	int r = queryBuilder.StartNewModule(m_pScriptEngine, pDisc);
+	if (r < 0)
+	{
+		// If the code fails here it is usually because there
+		// is no more memory to allocate the module
+		H_ERROR("Unrecoverable error while starting a new module.");
+		return false;
+	}
+	char filePathAsChar[1024];
+	for (uint32 iInclude = 0; iInclude < m_mandatoryScriptIncludes.Size(); iInclude++)
+	{
+		memset(filePathAsChar, 0, 1024);
+		const MandatoryScriptInclude& mandatoryInclude = m_mandatoryScriptIncludes[iInclude];
+		const FilePath scriptsBaseIncludePath = FilePath::GetAngelscriptDirectory() + StringLW(mandatoryInclude.m_pRelativePath).Data(); // <- Contains IComponent
+		FromWCharToConstChar(scriptsBaseIncludePath.Data(), filePathAsChar, 1024);
+		r = queryBuilder.AddSectionFromFile(filePathAsChar);
+		if (r < 0)
+		{
+			H_ERROR(StringL::Format("Failed to load mandatory include: %s", mandatoryInclude.m_name));
+			return false;
+		}
+	}
+	memset(filePathAsChar, 0, 1024);
+	FromWCharToConstChar(componentFilePath.Data(), filePathAsChar, 1024);
+	r = queryBuilder.AddSectionFromFile(filePathAsChar);
+
+	H_ASSERT(r >= 0, "The builder wasn't able to load the Script Component file");
+	if (r < 0)
+	{
+		return false;
+	}
+
+	queryBuilder.BuildModule();
+	m_pScriptComponentsModule = queryBuilder.GetModule();
+
+	asITypeInfo* pBaseComponentType = m_pScriptComponentsModule->GetTypeInfoByName("Component");
+
+	for (uint32 i = 0; i < m_pScriptComponentsModule->GetObjectTypeCount(); ++i)
+	{
+		asITypeInfo* pType = m_pScriptComponentsModule->GetObjectTypeByIndex(i);
+
+
+		if (!pType || !pBaseComponentType)
+		{
+			continue;
+		}
+
+		bool bFoundDerivedType = false;
+
+		for (asITypeInfo* pCurrent = pType->GetBaseType(); pCurrent != nullptr; pCurrent = pCurrent->GetBaseType())
+		{
+			if (pCurrent == pBaseComponentType)
+			{
+				uint32 componentTypeId = m_pComponentManager->RegisterAngelscriptComponentTypeInfo(pType);
+
+				ScriptComponentInformation& scriptComponentToAdd = m_scriptComponentsToAdd.Add();
+				scriptComponentToAdd.m_id = componentTypeId;
+				scriptComponentToAdd.m_name = pType->GetName();
+			}
+		}
 	}
 }
 
@@ -459,39 +527,46 @@ bool Hail::AngelScript::Runner::CreateCapabilityModule(String64 capabilityName, 
 
 bool Hail::AngelScript::Runner::CreateScriptModuleInternal(String64 scriptName, const FilePath& pathToScript)
 {
-	CScriptBuilder builder;
-	int r = builder.StartNewModule(m_pScriptEngine, scriptName.Data());
-	if (r < 0)
-	{
-		// If the code fails here it is usually because there
-		// is no more memory to allocate the module
-		H_ERROR("Unrecoverable error while starting a new module.");
-		return false;
-	}
+	// Initial builder is to query the script for types which to generate code from, aka components or Capabilities etc
 	char filePathAsChar[1024];
-	for (uint32 iInclude = 0; iInclude < m_mandatoryScriptIncludes.Size(); iInclude++)
-	{
-		memset(filePathAsChar, 0, 1024);
-		const MandatoryScriptInclude& mandatoryInclude = m_mandatoryScriptIncludes[iInclude];
-		const FilePath scriptsBaseIncludePath = FilePath::GetAngelscriptDirectory() + StringLW(mandatoryInclude.m_pRelativePath).Data();
-		FromWCharToConstChar(scriptsBaseIncludePath.Data(), filePathAsChar, 1024);
-		r = builder.AddSectionFromFile(filePathAsChar);
-		if (r < 0)
+	auto addScriptIncludes = [this, filePathAsChar](char* pFilePathAsCharBuffer, int& r, CScriptBuilder& builderToWorkOn, const FilePath& scriptPath) {
+		for (uint32 iInclude = 0; iInclude < m_mandatoryScriptIncludes.Size(); iInclude++)
 		{
-			H_ERROR(StringL::Format("Failed to load mandatory include: %s", mandatoryInclude.m_name));
-			return false;
+			memset(pFilePathAsCharBuffer, 0, 1024);
+			const MandatoryScriptInclude& mandatoryInclude = m_mandatoryScriptIncludes[iInclude];
+			const FilePath scriptsBaseIncludePath = FilePath::GetAngelscriptDirectory() + StringLW(mandatoryInclude.m_pRelativePath).Data(); // <- Contains IComponent
+			FromWCharToConstChar(scriptsBaseIncludePath.Data(), pFilePathAsCharBuffer, 1024);
+			r = builderToWorkOn.AddSectionFromFile(pFilePathAsCharBuffer);
+			if (r < 0)
+			{
+				H_ERROR(StringL::Format("Failed to load mandatory include: %s", mandatoryInclude.m_name));
+				return false;
+			}
 		}
-	}
-	memset(filePathAsChar, 0, 1024);
-	FromWCharToConstChar(pathToScript.Data(), filePathAsChar, 1024);
-	r = builder.AddSectionFromFile(filePathAsChar);
+		memset(pFilePathAsCharBuffer, 0, 1024);
+		FromWCharToConstChar(scriptPath.Data(), pFilePathAsCharBuffer, 1024);
+		r = builderToWorkOn.AddSectionFromFile(pFilePathAsCharBuffer);
+	};
+
+	CScriptBuilder scriptBuilder;
+	int r = scriptBuilder.StartNewModule(m_pScriptEngine, scriptName.Data());
+
+	addScriptIncludes(filePathAsChar, r, scriptBuilder, pathToScript);
 	if (r < 0)
 	{
+		H_ERROR(StringL::Format("The builder wasn't able to load the file %s.", filePathAsChar));
 		// The builder wasn't able to load the file. Maybe the file has been removed, or the wrong name was given, or some preprocessing commands are incorrectly written.
 		return false;
 	}
 
-	r = builder.BuildModule();
+	// Generate API before final build
+	for (uint32 i = 0; i < m_scriptComponentsToAdd.Size(); ++i)
+	{
+		const ScriptComponentInformation& componentInformationToAdd = m_scriptComponentsToAdd[i];
+		GenerateScriptModuleComponentFunctions(componentInformationToAdd.m_id, componentInformationToAdd.m_name, scriptBuilder);
+	}
+
+	r = scriptBuilder.BuildModule();
 	if (r < 0)
 	{
 		// An error occurred. Instruct the script writer to fix the compilation errors that were listed in the output stream.
@@ -517,5 +592,25 @@ bool Hail::AngelScript::Runner::ReloadScript(Script& scriptToReload)
 	}
 
 	return scriptToReload.loadStatus == eScriptLoadStatus::NoError;
+}
+
+void Hail::AngelScript::Runner::GenerateScriptModuleComponentFunctions(uint32 componentIdNumber, const char* pComponentName, CScriptBuilder& scriptBuilder)
+{
+	int r;
+	{
+		StringL GetComponentFunction = StringL::Format("%s@ Get%s(uint handle)\n{\n\treturn cast<%s@>(GetAngelscriptComponent(handle, %u));\n}", pComponentName, pComponentName, pComponentName, componentIdNumber);
+		r = scriptBuilder.GetModule()->AddScriptSection(StringL::Format("GeneratedAPI_GetComp_%s%u", pComponentName, componentIdNumber), GetComponentFunction);
+		H_ASSERT(r >= 0, StringL::Format("Non valid component generation code: %s", GetComponentFunction.Data()));
+	}
+	{
+		StringL GetOrCreateComponentFunction = StringL::Format("%s@ GetOrCreate%s(uint handle)\n{\n\treturn cast<%s@>(GetOrCreateAngelscriptComponent(handle, %u));\n}", pComponentName, pComponentName, pComponentName, componentIdNumber);
+		r = scriptBuilder.GetModule()->AddScriptSection(StringL::Format("GeneratedAPI_GetOrCreateComp_%s%u", pComponentName, componentIdNumber), GetOrCreateComponentFunction);
+		H_ASSERT(r >= 0, StringL::Format("Non valid component generation code: %s", GetOrCreateComponentFunction.Data()));
+	}
+	{
+		StringL HasComponentFunction = StringL::Format("bool Has%s(uint handle)\n{\n\treturn HasAngelscriptComponent(handle, %u);\n}", pComponentName, componentIdNumber);
+		r = scriptBuilder.GetModule()->AddScriptSection(StringL::Format("GeneratedAPI_HasScriptComp_%s%u", pComponentName, componentIdNumber), HasComponentFunction);
+		H_ASSERT(r >= 0, StringL::Format("Non valid component generation code: %s", HasComponentFunction.Data()));
+	}
 }
 

@@ -54,9 +54,9 @@ namespace Hail
 
 	// ---
 
-	void SortWithQuick(GrowingArray<CapabilityTickLinkedElement*>* aArray, uint8_t left, uint8_t right)
+	void SortWithQuick(GrowingArray<CapabilityTickLinkedElement*>* aArray, int left, int right)
 	{
-		uint8_t i = left, j = right;
+		int i = left, j = right;
 		CapabilityTickLinkedElement* temp;
 		const CapabilityTickLinkedElement* pivot = (*aArray)[(left + right) / 2];
 
@@ -68,7 +68,8 @@ namespace Hail
 			while ((*aArray)[j]->m_sortable > pivot->m_sortable)
 				j--;
 
-			if (i <= j) {
+			if (i <= j) 
+			{
 				temp = (*aArray)[i];
 				(*aArray)[i] = (*aArray)[j];
 				(*aArray)[j] = temp;
@@ -94,7 +95,7 @@ namespace Hail
 		{
 			// insert new elements while ticking
 			if (m_elementsToAdd.Size() > 1)
-				SortWithQuick(&m_elementsToAdd, 0, (uint8_t)m_elementsToAdd.Size() - 1);
+				SortWithQuick(&m_elementsToAdd, 0, (int)m_elementsToAdd.Size() - 1);
 			size_t AddNextIndex = 0;
 			size_t NumThingsToAdd = m_elementsToAdd.Size();
 

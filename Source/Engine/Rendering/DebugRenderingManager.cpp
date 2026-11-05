@@ -170,11 +170,11 @@ void Hail::DebugRenderingManager::Prepare(RenderCommandPool& poolOfCommands)
 		DebugLineData line;
 		// TODO: Make sure the positions get set without clipspace adjustments for 3D lines
 		line.posAndIs2D = glm::vec4((debugLine.pos1.x - 0.5) * 2.0, (debugLine.pos1.y - 0.5) * 2.0, debugLine.pos1.z, debugLine.bIs2D ? 0.0f : 1.0f);
-		line.color = debugLine.color1.GetColorWithAlpha();
+		line.color = debugLine.color1.GetColorVec4();
 		m_debugLineData.Add(line);
 
 		line.posAndIs2D = glm::vec4((debugLine.pos2.x - 0.5) * 2.0, (debugLine.pos2.y - 0.5) * 2.0, debugLine.pos2.z, debugLine.bIs2D ? 0.0f : 1.0f);
-		line.color = debugLine.color2.GetColorWithAlpha();
+		line.color = debugLine.color2.GetColorVec4();
 		m_debugLineData.Add(line);
 	}
 

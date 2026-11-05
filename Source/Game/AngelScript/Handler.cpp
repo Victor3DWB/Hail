@@ -87,105 +87,132 @@ namespace
 	}
 
 	// All non normalized functions work in pixel coordinates.
-	//TODO: Add a color type to AngelScript
-	static void localDrawLineNormalized(const Vec2& startPos, const Vec2& endPos)
+	static void localDrawLineNormalized(const Vec2& startPos, const Vec2& endPos, uint32 color)
 	{
-		DrawLine2D(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, startPos.m_vec, endPos.m_vec, true);
+		Color colorUnconverted = Color(color);
+		glm::vec4 colorConverted = colorUnconverted.GetColorVec4();
+		DrawLine2D(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, startPos.m_vec, endPos.m_vec, true, colorConverted, colorConverted);
 	}
 
-	static void localDrawLineNormalizedScreenAlligned(const Vec2& startPos, const Vec2& endPos)
+	static void localDrawLineNormalizedScreenAlligned(const Vec2& startPos, const Vec2& endPos, uint32 color)
 	{
-		DrawLine2D(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, startPos.m_vec, endPos.m_vec, false);
+		Color colorUnconverted = Color(color);
+		glm::vec4 colorConverted = colorUnconverted.GetColorVec4();
+		DrawLine2D(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, startPos.m_vec, endPos.m_vec, false, colorConverted, colorConverted);
 	}
 
-	static void localDrawLine(const Vec2& startPos, const Vec2& endPos)
+	static void localDrawLine(const Vec2& startPos, const Vec2& endPos, uint32 color)
 	{
-		DrawLine2DPixelSpace(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, startPos.m_vec, endPos.m_vec, true);
+		Color colorUnconverted = Color(color);
+		glm::vec4 colorConverted = colorUnconverted.GetColorVec4();
+		DrawLine2DPixelSpace(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, startPos.m_vec, endPos.m_vec, true, colorConverted, colorConverted);
 	}
 
-	static void localDrawLineScreenAlligned(const Vec2& startPos, const Vec2& endPos)
+	static void localDrawLineScreenAlligned(const Vec2& startPos, const Vec2& endPos, uint32 color)
 	{
-		DrawLine2DPixelSpace(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, startPos.m_vec, endPos.m_vec, false);
+		Color colorUnconverted = Color(color);
+		glm::vec4 colorConverted = colorUnconverted.GetColorVec4();
+		DrawLine2DPixelSpace(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, startPos.m_vec, endPos.m_vec, false, colorConverted, colorConverted);
 	}
 
-	static void localDrawLineNormalizedRotLength(const Vec2& startPos, float rotationRadian, float length)
+	static void localDrawLineNormalizedRotLength(const Vec2& startPos, float rotationRadian, float length, uint32 color)
 	{
-		DrawLine2D(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, startPos.m_vec, rotationRadian, length, true);
+		Color colorUnconverted = Color(color);
+		glm::vec4 colorConverted = colorUnconverted.GetColorVec4();
+		DrawLine2D(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, startPos.m_vec, rotationRadian, length, true, colorConverted, colorConverted);
 	}
 
-	static void localDrawLineNormalizedRotLengthScreenAlligned(const Vec2& startPos, float rotationRadian, float length)
+	static void localDrawLineNormalizedRotLengthScreenAlligned(const Vec2& startPos, float rotationRadian, float length, uint32 color)
 	{
-		DrawLine2D(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, startPos.m_vec, rotationRadian, length, false);
+		Color colorUnconverted = Color(color);
+		glm::vec4 colorConverted = colorUnconverted.GetColorVec4();
+		DrawLine2D(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, startPos.m_vec, rotationRadian, length, false, colorConverted, colorConverted);
 	}
 
-	static void localDrawLineRotLength(const Vec2& startPos, float rotationRadian, float length)
+	static void localDrawLineRotLength(const Vec2& startPos, float rotationRadian, float length, uint32 color)
 	{
-		DrawLine2DPixelSpace(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, startPos.m_vec, rotationRadian, length, true);
+		Color colorUnconverted = Color(color);
+		glm::vec4 colorConverted = colorUnconverted.GetColorVec4();
+		DrawLine2DPixelSpace(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, startPos.m_vec, rotationRadian, length, true, colorConverted, colorConverted);
 	}
 
-	static void localDrawLineRotLengthScreenAlligned(const Vec2& startPos, float rotationRadian, float length)
+	static void localDrawLineRotLengthScreenAlligned(const Vec2& startPos, float rotationRadian, float length, uint32 color)
 	{
-		DrawLine2DPixelSpace(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, startPos.m_vec, rotationRadian, length, false);
+		Color colorUnconverted = Color(color);
+		glm::vec4 colorConverted = colorUnconverted.GetColorVec4();
+		DrawLine2DPixelSpace(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, startPos.m_vec, rotationRadian, length, false, colorConverted, colorConverted);
 	}
 
-	static void localDrawBoxNormalized(const Vec2& pos, const Vec2& dimensions)
+	static void localDrawBoxNormalized(const Vec2& pos, const Vec2& dimensions, uint32 color)
 	{
-		DrawBox2D(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, pos.m_vec, dimensions.m_vec, true);
+		Color colorUnconverted = Color(color);
+		DrawBox2D(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, pos.m_vec, dimensions.m_vec, true, colorUnconverted.GetColorVec4());
 	}
 
-	static void localDrawBoxNormalizedScreenAlligned(const Vec2& pos, const Vec2& dimensions)
+	static void localDrawBoxNormalizedScreenAlligned(const Vec2& pos, const Vec2& dimensions, uint32 color)
 	{
-		DrawBox2D(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, pos.m_vec, dimensions.m_vec, false);
+		Color colorUnconverted = Color(color);
+		DrawBox2D(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, pos.m_vec, dimensions.m_vec, false, colorUnconverted.GetColorVec4());
 	}
 
-	static void localDrawBox(const Vec2& pos, const Vec2& dimensions)
+	static void localDrawBox(const Vec2& pos, const Vec2& dimensions, uint32 color)
 	{
-		DrawBox2DPixelSpace(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, pos.m_vec, dimensions.m_vec, true);
+		Color colorUnconverted = Color(color);
+		DrawBox2DPixelSpace(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, pos.m_vec, dimensions.m_vec, true, colorUnconverted.GetColorVec4());
 	}
 
-	static void localDrawBoxScreenAlligned(const Vec2& pos, const Vec2& dimensions)
+	static void localDrawBoxScreenAlligned(const Vec2& pos, const Vec2& dimensions, uint32 color)
 	{
-		DrawBox2DPixelSpace(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, pos.m_vec, dimensions.m_vec, false);
+		Color colorUnconverted = Color(color);
+		DrawBox2DPixelSpace(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, pos.m_vec, dimensions.m_vec, false, colorUnconverted.GetColorVec4());
 	}
 
-	static void localDrawBoxMinMaxNormalized(const Vec2& min, const Vec2& max)
+	static void localDrawBoxMinMaxNormalized(const Vec2& min, const Vec2& max, uint32 color)
 	{
-		DrawRect2D(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, min.m_vec, max.m_vec, true);
+		Color colorUnconverted = Color(color);
+		DrawRect2D(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, min.m_vec, max.m_vec, true, colorUnconverted.GetColorVec4());
 	}
 
-	static void localDrawBoxMinMaxNormalizedScreenAlligned(const Vec2& min, const Vec2& max)
+	static void localDrawBoxMinMaxNormalizedScreenAlligned(const Vec2& min, const Vec2& max, uint32 color)
 	{
-		DrawRect2D(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, min.m_vec, max.m_vec, false);
+		Color colorUnconverted = Color(color);
+		DrawRect2D(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, min.m_vec, max.m_vec, false, colorUnconverted.GetColorVec4());
 	}
 
-	static void localDrawBoxMinMax(const Vec2& min, const Vec2& max)
+	static void localDrawBoxMinMax(const Vec2& min, const Vec2& max, uint32 color)
 	{
-		DrawRect2DPixelSpace(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, min.m_vec, max.m_vec, true);
+		Color colorUnconverted = Color(color);
+		DrawRect2DPixelSpace(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, min.m_vec, max.m_vec, true, colorUnconverted.GetColorVec4());
 	}
 
-	static void localDrawBoxMinMaxScreenAlligned(const Vec2& min, const Vec2& max)
+	static void localDrawBoxMinMaxScreenAlligned(const Vec2& min, const Vec2& max, uint32 color)
 	{
-		DrawRect2DPixelSpace(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, min.m_vec, max.m_vec, false);
+		Color colorUnconverted = Color(color);
+		DrawRect2DPixelSpace(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, min.m_vec, max.m_vec, false, colorUnconverted.GetColorVec4());
 	}
 
-	static void localDrawCircleNormalized(const Vec2& pos, float radius)
+	static void localDrawCircleNormalized(const Vec2& pos, float radius, uint32 color)
 	{
-		DrawCircle2D(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, pos.m_vec, radius, true);
+		Color colorUnconverted = Color(color);
+		DrawCircle2D(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, pos.m_vec, radius, true, colorUnconverted.GetColorVec4());
 	}
 
-	static void localDrawCircleNormalizedScreenAlligned(const Vec2& pos, float radius)
+	static void localDrawCircleNormalizedScreenAlligned(const Vec2& pos, float radius, uint32 color)
 	{
-		DrawCircle2D(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, pos.m_vec, radius, false);
+		Color colorUnconverted = Color(color);
+		DrawCircle2D(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, pos.m_vec, radius, false, colorUnconverted.GetColorVec4());
 	}
 
-	static void localDrawCircle(const Vec2& pos, float radius)
+	static void localDrawCircle(const Vec2& pos, float radius, uint32 color)
 	{
-		DrawCircle2DPixelSpace(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, pos.m_vec, radius, true);
+		Color colorUnconverted = Color(color);
+		DrawCircle2DPixelSpace(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, pos.m_vec, radius, true, colorUnconverted.GetColorVec4());
 	}
 
-	static void localDrawCircleScreenAlligned(const Vec2& pos, float radius)
+	static void localDrawCircleScreenAlligned(const Vec2& pos, float radius, uint32 color)
 	{
-		DrawCircle2DPixelSpace(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, pos.m_vec, radius, false);
+		Color colorUnconverted = Color(color);
+		DrawCircle2DPixelSpace(*g_pThreadSynchronizer->GetAppFrameData().commandPoolToFill, pos.m_vec, radius, false, colorUnconverted.GetColorVec4() );
 	}
 }
 
@@ -223,31 +250,31 @@ void Hail::AngelScript::Handler::RegisterGlobalMessages()
 
 	// Debug lines
 
-	const VectorOnStack<VariableTypeData, 8u> lineArgumentVariables = { {"start", "Vec2", true, true, true }, { "end", "Vec2", true, true, true } };
+	const VectorOnStack<VariableTypeData, 8u> lineArgumentVariables = { {"start", "Vec2", true, true, true }, { "end", "Vec2", true, true, true }, { "color", "uint" } };
 	bResult = m_pTypeRegistry->RegisterGlobalMethod({ "DrawLineNormalized", "void" }, lineArgumentVariables, asFUNCTION(localDrawLineNormalized), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register global func");
 	bResult = m_pTypeRegistry->RegisterGlobalMethod({ "DrawLineNormalizedScreenAlligned", "void" }, lineArgumentVariables, asFUNCTION(localDrawLineNormalizedScreenAlligned), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register global func");
 	bResult = m_pTypeRegistry->RegisterGlobalMethod({ "DrawLine", "void" }, lineArgumentVariables, asFUNCTION(localDrawLine), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register global func");
 	bResult = m_pTypeRegistry->RegisterGlobalMethod({ "DrawLineScreenAlligned", "void" },	lineArgumentVariables,			asFUNCTION(localDrawLineScreenAlligned), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register global func");
 
-	const VectorOnStack<VariableTypeData, 8u> lineRotLengthArgumentVariables = { {"start", "Vec2", true, true, true }, { "rotationRad", "float" }, { "length", "float" }};
+	const VectorOnStack<VariableTypeData, 8u> lineRotLengthArgumentVariables = { {"start", "Vec2", true, true, true }, { "rotationRad", "float" }, { "length", "float" }, { "color", "uint" } };
 	bResult = m_pTypeRegistry->RegisterGlobalMethod({ "DrawLineNormalized", "void" }, lineRotLengthArgumentVariables, asFUNCTION(localDrawLineNormalizedRotLength), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register global func");
 	bResult = m_pTypeRegistry->RegisterGlobalMethod({ "DrawLineNormalizedScreenAlligned", "void" }, lineRotLengthArgumentVariables, asFUNCTION(localDrawLineNormalizedRotLengthScreenAlligned), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register global func");
 	bResult = m_pTypeRegistry->RegisterGlobalMethod({ "DrawLine", "void" }, lineRotLengthArgumentVariables, asFUNCTION(localDrawLineRotLength), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register global func");
 	bResult = m_pTypeRegistry->RegisterGlobalMethod({ "DrawLineScreenAlligned", "void" },			lineRotLengthArgumentVariables, asFUNCTION(localDrawLineRotLengthScreenAlligned), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register global func");
 
-	const VectorOnStack<VariableTypeData, 8u> drawBoxArgumentVariables = { {"pos", "Vec2", true, true, true }, { "dimensions", "Vec2", true, true, true } };
+	const VectorOnStack<VariableTypeData, 8u> drawBoxArgumentVariables = { {"pos", "Vec2", true, true, true }, { "dimensions", "Vec2", true, true, true }, { "color", "uint" } };
 	bResult = m_pTypeRegistry->RegisterGlobalMethod({ "DrawBoxNormalized", "void" }, drawBoxArgumentVariables, asFUNCTION(localDrawBoxNormalized), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register global func");
 	bResult = m_pTypeRegistry->RegisterGlobalMethod({ "DrawBoxNormalizedScreenAlligned", "void" }, drawBoxArgumentVariables, asFUNCTION(localDrawBoxNormalizedScreenAlligned), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register global func");
 	bResult = m_pTypeRegistry->RegisterGlobalMethod({ "DrawBox", "void" }, drawBoxArgumentVariables, asFUNCTION(localDrawBox), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register global func");
 	bResult = m_pTypeRegistry->RegisterGlobalMethod({ "DrawBoxScreenAlligned", "void" }, drawBoxArgumentVariables, asFUNCTION(localDrawBoxScreenAlligned), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register global func");
 
-	const VectorOnStack<VariableTypeData, 8u> drawBoxMinMaxArgumentVariables = { {"min", "Vec2", true, true, true }, { "max", "Vec2", true, true, true } };
+	const VectorOnStack<VariableTypeData, 8u> drawBoxMinMaxArgumentVariables = { {"min", "Vec2", true, true, true }, { "max", "Vec2", true, true, true }, { "color", "uint" } };
 	bResult = m_pTypeRegistry->RegisterGlobalMethod({ "DrawBoxMinMaxNormalized", "void" }, drawBoxMinMaxArgumentVariables, asFUNCTION(localDrawBoxMinMaxNormalized), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register global func");
 	bResult = m_pTypeRegistry->RegisterGlobalMethod({ "DrawBoxMinMaxNormalizedScreenAlligned", "void" }, drawBoxMinMaxArgumentVariables, asFUNCTION(localDrawBoxMinMaxNormalizedScreenAlligned), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register global func");
 	bResult = m_pTypeRegistry->RegisterGlobalMethod({ "DrawBoxMinMax", "void" }, drawBoxMinMaxArgumentVariables, asFUNCTION(localDrawBoxMinMax), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register global func");
 	bResult = m_pTypeRegistry->RegisterGlobalMethod({ "DrawBoxMinMaxScreenAlligned", "void" }, drawBoxMinMaxArgumentVariables, asFUNCTION(localDrawBoxMinMaxScreenAlligned), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register global func");
 
-	const VectorOnStack<VariableTypeData, 8u> drawCircleArgumentVariables = { {"pos", "Vec2", true, true, true }, { "radius", "float" } };
+	const VectorOnStack<VariableTypeData, 8u> drawCircleArgumentVariables = { {"pos", "Vec2", true, true, true }, { "radius", "float" }, { "color", "uint" } };
 	bResult = m_pTypeRegistry->RegisterGlobalMethod({ "DrawCircleNormalized", "void" }, drawCircleArgumentVariables, asFUNCTION(localDrawCircleNormalized), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register global func");
 	bResult = m_pTypeRegistry->RegisterGlobalMethod({ "DrawCircleNormalizedScreenAlligned", "void" }, drawCircleArgumentVariables, asFUNCTION(localDrawCircleNormalizedScreenAlligned), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register global func");
 	bResult = m_pTypeRegistry->RegisterGlobalMethod({ "DrawCircle", "void" }, drawCircleArgumentVariables, asFUNCTION(localDrawCircle), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register global func");
@@ -351,7 +378,7 @@ void Hail::AngelScript::Handler::RegisterAngelScriptVectorType()
 	bResult = m_pTypeRegistry->RegisterClassConstructor("Vec2", {}, {}, asFUNCTION(Vec2DefaultDestructor), false, H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Vec2 func");
 	bResult = m_pTypeRegistry->RegisterClassConstructor("Vec2", { { "in", "Vec2", true, true } }, {}, asFUNCTION(Vec2CopyConstructor), true, H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Vec2 func");
 	bResult = m_pTypeRegistry->RegisterClassConstructor("Vec2", { { "", "float" } }, {}, asFUNCTION(Vec2ConvConstructor), true, H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Vec2 func");
-	bResult = m_pTypeRegistry->RegisterClassConstructor("Vec2", { { "", "float" }, { "", "float" } }, {}, asFUNCTION(Vec2InitConstructor), true, H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Vec2 func");
+	bResult = m_pTypeRegistry->RegisterClassConstructor("Vec2", { { "x", "float" }, { "y", "float" } }, {}, asFUNCTION(Vec2InitConstructor), true, H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Vec2 func");
 	bResult = m_pTypeRegistry->RegisterClassConstructor("Vec2", { { "in", "int", true, true } }, { { "", "float" }, { "", "float" } }, asFUNCTION(Vec2ListConstructor), true, H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Vec2 func");
 
 	// Register the object properties
@@ -504,7 +531,7 @@ float Hail::AngelScript::Vec2::SquaredLength() const
 Vec2 Hail::AngelScript::Vec2::GetNormalized() const
 {
 	Vec2 returnVector{};
-	if (m_vec.x != 0.0 && m_vec.y != 0.0)
+	if (m_vec.x != 0.0 || m_vec.y != 0.0)
 	{
 		const glm::vec2 vec2 = glm::normalize(m_vec);
 		returnVector = Vec2(vec2.x, vec2.y);

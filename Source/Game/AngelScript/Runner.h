@@ -4,16 +4,20 @@
 #include "DebuggerTypes.h"
 #include "Script.h"
 
-class asIScriptEngine;
 class asIScriptContext;
+class asIScriptEngine;
+class asIScriptModule;
+
+class CScriptBuilder;
 
 namespace Hail
 {
 	class FilePath;
 	class Capability;
 	class CapabilitySystem;
-	struct AngelscriptCapabilityComponent;
+	class ComponentManager;
 	struct CapabilityCreationRequest;
+	struct AngelscriptCapabilityComponent;
 
 	namespace AngelScript
 	{
@@ -32,6 +36,7 @@ namespace Hail
 				asIScriptEngine* m_pScriptEngine;
 				TypeRegistry* m_pTypeRegistry;
 				CapabilitySystem* m_pCapabilitySystem;
+				ComponentManager* m_pComponentManager;
 			};
 
 			void Init(const InitParams& initParams);
@@ -47,6 +52,7 @@ namespace Hail
 			void Cleanup();
 
 			void AddMandatoryScriptPath(const char* pSectionName, const char* pMandatoryRelativeScriptPath);
+			bool SetScriptDefinedComponents(const FilePath& componentFilePath);
 
 			DebuggerServer* GetDebuggerServer() { return m_pDebuggerServer; }
 
@@ -65,10 +71,13 @@ namespace Hail
 			bool CreateScriptModuleInternal(String64 scriptName, const FilePath& pathToScript);
 			bool ReloadScript(Script& scriptToReload);
 
+			void GenerateScriptModuleComponentFunctions(uint32 componentIdNumber, const char* pComponentName, CScriptBuilder& scriptBuilder);
+
 			asIScriptEngine* m_pScriptEngine;
 			DebuggerServer* m_pDebuggerServer;
 			TypeRegistry* m_pTypeRegistry;
 			CapabilitySystem* m_pCapabilitySystem;
+			ComponentManager* m_pComponentManager;
 			GrowingArray<Script> m_scripts;
 
 			bool m_bScriptsHaveReloaded;
@@ -80,8 +89,16 @@ namespace Hail
 			};
 
 			GrowingArray<MandatoryScriptInclude> m_mandatoryScriptIncludes;
+			struct ScriptComponentInformation
+			{
+				String64 m_name;
+				uint32 m_id;
+			};
+			GrowingArray<ScriptComponentInformation>m_scriptComponentsToAdd;
 
 			GrowingArray<Script> m_capabilityScripts;
+
+			asIScriptModule* m_pScriptComponentsModule;
 		};
 	}
 }

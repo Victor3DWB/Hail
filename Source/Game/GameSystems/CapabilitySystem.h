@@ -25,8 +25,8 @@ namespace Hail
 
 		void Update(float deltaTime);
 
-		void RegisterCapabilityToEntity(const Entity& owningEntity, Capability* pCapability);
-		void UnregisterCapabilityFromEntity(const Entity& owningEntity, Capability* pCapability);
+		void RegisterCapabilityToEntity(const EntityHandle& owningEntity, Capability* pCapability);
+		void UnregisterCapabilityFromEntity(const EntityHandle& owningEntity, const char* pCapabilityName);
 
 		void CapabilityHasBeenReloaded(const String64& reloadedCapability);
 		uint32 GetCapabilityLoadVersion(const String64& capabilityName);

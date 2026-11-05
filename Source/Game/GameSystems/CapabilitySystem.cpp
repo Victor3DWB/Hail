@@ -26,6 +26,7 @@ namespace Hail
 		if (m_bCapabilityHasBeenReloaded)
 		{
 			// Check each registered Capability type
+			bool bFoundCapabilityForReload = false;
 			for (uint32 iCapabilityData = 0; iCapabilityData < m_registeredCapabilities.Size(); iCapabilityData++)
 			{
 				CapabilityData& capabilityData = m_registeredCapabilities[iCapabilityData];
@@ -45,6 +46,7 @@ namespace Hail
 						if (StringCompare(reloadedCapabilityName, componentCapabilityData.m_capabilityName) && componentCapabilityData.m_loadVersion != capabilityData.m_loadVersion)
 						{
 							m_CapabilityTickWorld.UnRegisterCapability(pCapability);
+							pCapability->OnOwnerDestroyed();
 							pCapability->Release();
 							H_ASSERT(pCapability->GetRefCount() == 0);
 							SAFEDELETE(pCapability);
@@ -57,38 +59,35 @@ namespace Hail
 
 							componentCapabilityData.m_capabilityId = pReloadedCapability->GetId();
 							componentCapabilityData.m_loadVersion = capabilityData.m_loadVersion;
-							
+
 							pCapability = pReloadedCapability;
-							pCapability->SetOwningEntity(m_pEntityManager->GetEntityFromIndex(owningEntityHandle));
+							pCapability->SetOwningEntity(owningEntityHandle);
 							capabilityData.m_pCapabilities[iCapability] = pCapability;
 
 							m_CapabilityTickWorld.RegisterCapability(*pCapability);
-
+							bFoundCapabilityForReload = true;
 							break;
-						}
-						else
-						{
-							H_ASSERT(false, "This should not happen, so sanity checking for logic errors");
 						}
 					}
 				}
 			}
+			H_ASSERT(bFoundCapabilityForReload, "This should not happen, so sanity checking for logic errors");
 			m_bCapabilityHasBeenReloaded = false;
 		}
 
 		m_CapabilityTickWorld.Tick(deltaTime);
 	}
 
-	void CapabilitySystem::RegisterCapabilityToEntity(const Entity& owningEntity, Capability* pCapability)
+	void CapabilitySystem::RegisterCapabilityToEntity(const EntityHandle& owningEntity, Capability* pCapability)
 	{
-		if (!m_pComponentManager->DoesEntityHaveComponent(owningEntity.GetId(), EComponentType::AnngelScriptCapabilityComponent))
+		if (!m_pComponentManager->DoesEntityHaveComponent(owningEntity, EComponentType::AnngelScriptCapabilityComponent))
 		{
-			m_pComponentManager->AddComponentToEntity(owningEntity.GetId(), EComponentType::AnngelScriptCapabilityComponent);
+			m_pComponentManager->AddComponentToEntity(owningEntity, EComponentType::AnngelScriptCapabilityComponent);
 		}
 
 		const char* pCapabilityName = pCapability->GetCapabilityName();
 
-		AngelscriptCapabilityComponent* pCapabilityComponent = m_pComponentManager->GetAngelscriptCapabilityComponent(owningEntity.GetId());
+		AngelscriptCapabilityComponent* pCapabilityComponent = m_pComponentManager->GetAngelscriptCapabilityComponent(owningEntity);
 		H_ASSERT(pCapabilityComponent);
  		for (uint32 i = 0; i < pCapabilityComponent->m_capabilities.Size(); i++)
 		{
@@ -131,9 +130,55 @@ namespace Hail
 		m_CapabilityTickWorld.RegisterCapability(*pCapability);
 	}
 
-	void CapabilitySystem::UnregisterCapabilityFromEntity(const Entity& owningEntity, Capability* pCapability)
+	void CapabilitySystem::UnregisterCapabilityFromEntity(const EntityHandle& owningEntity, const char* pCapabilityName)
 	{
-		// TODO:
+		if (!m_pComponentManager->DoesEntityHaveComponent(owningEntity, EComponentType::AnngelScriptCapabilityComponent))
+		{
+			return;
+		}
+
+		CapabilityData* pRegisteredCapabilityData = nullptr;
+
+		for (uint32 iCapability = 0; iCapability < m_registeredCapabilities.Size(); iCapability++)
+		{
+			if (StringCompare(m_registeredCapabilities[iCapability].m_name, pCapabilityName))
+			{
+				pRegisteredCapabilityData = &m_registeredCapabilities[iCapability];
+				break;
+			}
+		}
+
+		if (!pRegisteredCapabilityData)
+		{
+			return;
+		}
+
+		AngelscriptCapabilityComponent* pCapabilityComponent = m_pComponentManager->GetAngelscriptCapabilityComponent(owningEntity);
+		for (uint32 i = 0; i < pCapabilityComponent->m_capabilities.Size(); i++)
+		{
+			if (StringCompare(pCapabilityName, pCapabilityComponent->m_capabilities[i].m_capabilityName))
+			{
+				AngelscriptCapabilityComponent::AngelscriptCapabilityData& componentData = pCapabilityComponent->m_capabilities[i];
+				
+				for (uint32 iRegisteredCapability = 0; iRegisteredCapability < pRegisteredCapabilityData->m_pCapabilities.Size(); iRegisteredCapability++)
+				{
+					Capability* pCapability = pRegisteredCapabilityData->m_pCapabilities[iRegisteredCapability];
+					if (pCapability->GetId() == componentData.m_capabilityId)
+					{
+						m_CapabilityTickWorld.UnRegisterCapability(pCapability);
+						pRegisteredCapabilityData->m_pCapabilities.RemoveCyclicAtIndex(iRegisteredCapability);
+						pCapabilityComponent->m_capabilities.RemoveCyclicAtIndex(i);
+						pCapability->OnOwnerDestroyed();
+						pCapability->Release();
+						H_ASSERT(pCapability->GetRefCount() == 0);
+						SAFEDELETE(pCapability);
+						return;
+					}
+					H_ASSERT(StringCompare(pCapability->GetCapabilityName(), pCapabilityName) == false, "Capability is registered to this entity, but has the incorrect id");
+				}
+				break;
+			}
+		}
 	}
 
 	void CapabilitySystem::CapabilityHasBeenReloaded(const String64& reloadedCapability)

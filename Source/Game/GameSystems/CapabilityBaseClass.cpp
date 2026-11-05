@@ -172,6 +172,10 @@ namespace Hail
 
                 if (r != asEXECUTION_FINISHED)
                 {
+                    if (r == asEXECUTION_EXCEPTION)
+                    {
+                        H_ERROR(StringL::Format("Exception in Capability %s at line %i. Exception message: %s", this->GetCapabilityName(), ctx->GetExceptionLineNumber(), ctx->GetExceptionString()));
+                    }
                     engine->ReturnContext(ctx);
                     return nullptr;
                 }
@@ -266,7 +270,7 @@ namespace Hail
 
     float Capability::GetTimeDilation() const
     {
-        return 0.0f;
+        return 1.0f;
     }
 
     Capability* Capability::Factory()
@@ -292,10 +296,10 @@ namespace Hail
         return pCapability;
 	}
 
-    void Capability::SetOwningEntity(const Entity& entity)
+    void Capability::SetOwningEntity(const EntityHandle& entity)
     {
         H_ASSERT(m_owningEntityId == MAX_UINT);
-        m_owningEntityId = entity.GetId();
+        m_owningEntityId = entity;
     }
 
     void Capability::AddRef()

@@ -499,8 +499,8 @@ StringL Hail::StringL::operator+(const StringL& string1)
 
 		const char* previousString = previousShortString;
 		memcpy(m_memory.m_shortString, previousString, previousLength);
-		memcpy(m_memory.m_p + (previousLength), string1.m_memory.m_shortString, string1.m_length);
-		m_memory.m_p[m_length] = 0;
+		memcpy(m_memory.m_shortString + (previousLength), string1.m_memory.m_shortString, string1.m_length);
+		m_memory.m_shortString[m_length] = 0;
 		m_allocatedLength = 0;
 	}
 	return *this;

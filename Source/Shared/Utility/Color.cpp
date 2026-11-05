@@ -92,7 +92,7 @@ glm::vec3 Hail::Color::GetColorVec3() const
 	return locUnPackColorVec3(m_colorValue);
 }
 
-glm::vec4 Hail::Color::GetColorWithAlpha() const
+glm::vec4 Hail::Color::GetColorVec4() const
 {
 	return locUnPackColorVec4(m_colorValue);
 }
@@ -123,7 +123,7 @@ void Hail::Color::SetA(float colorValue)
 
 Color Hail::Color::Lerp(const Color& color1, const Color& color2, float T)
 {
-	glm::vec4 mixedColor = glm::mix(color1.GetColorWithAlpha(), color2.GetColorWithAlpha(), T);
+	glm::vec4 mixedColor = glm::mix(color1.GetColorVec4(), color2.GetColorVec4(), T);
 	return Color(mixedColor);
 }
 
