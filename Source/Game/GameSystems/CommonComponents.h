@@ -3,6 +3,7 @@
 #include "Containers\GrowingArray\GrowingArray.h"
 #include "Containers\VectorOnStack\VectorOnStack.h"
 #include "Transforms.h"
+#include "Utility\Color.h"
 
 class asITypeInfo;
 class asIScriptObject;
@@ -74,6 +75,20 @@ namespace Hail
 		uint32 m_typeId;
 	};
 
+	struct SpriteComponent
+	{
+		glm::vec4 m_uvTR_BL = { 0.0, 0.0, 1.0, 1.0 };
+		glm::vec2 m_pivot = { 0.5f, 0.5f };
+		Color m_color = Color({ 1.0f, 1.0f, 1.0f, 1.0f });
+		// Sprite to render with this command
+		uint32_t m_materialInstanceID = MAX_UINT;
+		int16 m_layer{ 0 };
+		bool m_bSizeRelativeToRenderTarget = true;
+		// true the scale will be in normalized size, so a size of 0.1 will always stay 0.1 of the screen percentage
+		// false the scale will be of the texture size on the render target, so the texture will be scaled by the scale, 
+		// false best used with UI or elements that should not scale with screen resolution
+		bool m_bIsAffectedBy2DCamera = true;
+	};
 }
 
 

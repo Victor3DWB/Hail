@@ -10,6 +10,7 @@ namespace Hail
 	{
 		m_physicsComponents.Init(128, pEntityManager);
 		m_capabilityComponents.Init(64, pEntityManager);
+		m_spriteComponents.Init(128, pEntityManager);
 	}
 
 	bool ComponentManager::DoesEntityHaveComponent(EntityHandle entityHandle, EComponentType componentToCheckFor)
@@ -18,6 +19,9 @@ namespace Hail
 		{
 		case Hail::EComponentType::PhysicsComponent:
 			return m_physicsComponents.HasComponent(entityHandle);
+			break;
+		case Hail::EComponentType::SpriteComponent:
+			return m_spriteComponents.HasComponent(entityHandle);
 			break;
 		case Hail::EComponentType::AnngelScriptCapabilityComponent:
 			return m_capabilityComponents.HasComponent(entityHandle);
@@ -35,6 +39,9 @@ namespace Hail
 		case Hail::EComponentType::PhysicsComponent:
 			m_physicsComponents.AddComponent(entityHandle);
 			break;
+		case Hail::EComponentType::SpriteComponent:
+			m_spriteComponents.AddComponent(entityHandle);
+			break;
 		case Hail::EComponentType::AnngelScriptCapabilityComponent:
 			m_capabilityComponents.AddComponent(entityHandle);
 			break;
@@ -46,6 +53,11 @@ namespace Hail
 	PhysicsComponent* ComponentManager::GetPhysicsComponent(EntityHandle entityHandle)
 	{
 		return m_physicsComponents.GetComponentFromEntity(entityHandle);
+	}
+
+	SpriteComponent* ComponentManager::GetSpriteComponent(EntityHandle entityHandle)
+	{
+		return m_spriteComponents.GetComponentFromEntity(entityHandle);
 	}
 
 	AngelscriptCapabilityComponent* ComponentManager::GetAngelscriptCapabilityComponent(EntityHandle entityHandle)

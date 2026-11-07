@@ -18,9 +18,12 @@ namespace Hail
 		bool HasComponent(EntityHandle entityHandle) const;
 		void RemoveComponent(EntityHandle entityHandle);
 		Entity& GetEntityFromComponentIndex(uint32 index);
+		const Entity& GetEntityFromComponentIndex(uint32 index) const;
 		ComponentType* GetComponentFromEntity(EntityHandle entityHandle);
+		const ComponentType* GetComponentFromEntity(EntityHandle entityHandle) const;
 		ComponentType* GetComponentFromIndex(uint32 componentIndex);
-		uint32 GetSize() { return m_components.Size(); }
+		const ComponentType* GetComponentFromIndex(uint32 componentIndex) const;
+		uint32 GetSize() const { return m_components.Size(); }
 
 	private:
 
@@ -107,7 +110,25 @@ namespace Hail
 	}
 
 	template<class ComponentType>
+	inline const Entity& ComponentArray<ComponentType>::GetEntityFromComponentIndex(uint32 index) const
+	{
+		H_ASSERT(index < m_pEntityManager->GetEntityCapacity());
+		return m_pEntityManager->GetEntityFromIndex(m_componentToEntityIdMap[index]);
+	}
+
+	template<class ComponentType>
 	inline ComponentType* ComponentArray<ComponentType>::GetComponentFromEntity(EntityHandle entityHandle)
+	{
+		H_ASSERT(entityHandle != MAX_UINT);
+
+		const uint32 componentIndex = m_entityIdToComponentMap[entityHandle];
+		H_ASSERT(componentIndex != MAX_UINT, "Trying to fetch component that has not been created by target entity.");
+
+		return &m_components[componentIndex];
+	}
+
+	template<class ComponentType>
+	inline const ComponentType* ComponentArray<ComponentType>::GetComponentFromEntity(EntityHandle entityHandle) const
 	{
 		H_ASSERT(entityHandle != MAX_UINT);
 
@@ -125,6 +146,13 @@ namespace Hail
 		return &m_components[componentIndex];
 	}
 
+	template<class ComponentType>
+	inline const ComponentType* ComponentArray<ComponentType>::GetComponentFromIndex(uint32 componentIndex) const
+	{
+		H_ASSERT(componentIndex < GetSize());
+
+		return &m_components[componentIndex];
+	}
 }
 
 

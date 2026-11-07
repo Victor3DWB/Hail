@@ -18,6 +18,8 @@ namespace Hail
     // must be global to access internal script objects
     ScriptManager* g_pScriptManager = nullptr;
     CapabilitySystem* g_pCapabilitySystem = nullptr;
+    ScriptFrameAccessibleData* g_pScriptFrameAccessibleData = nullptr;
+
     Hail::Transform2D* LocalGetEntityTransform(EntityHandle entityId)
     {
         H_ASSERT(entityId != MAX_UINT);
@@ -59,6 +61,12 @@ namespace Hail
     void LocalRemoveCapabilityFromEntity(uint32 entityHandle, std::string& capabilityName)
     {
         g_pCapabilitySystem->UnregisterCapabilityFromEntity(entityHandle, capabilityName.c_str());
+    }
+
+    Camera2D* LocalGetCamera2D()
+    {
+        H_ASSERT(g_pScriptFrameAccessibleData && g_pScriptFrameAccessibleData->m_pGame2DCamera);
+        return g_pScriptFrameAccessibleData->m_pGame2DCamera;
     }
 }
 
@@ -107,8 +115,9 @@ void Hail::ScriptManager::Cleanup()
     SAFEDELETE(m_pRunner);
 }
 
-void Hail::ScriptManager::Update(float deltaTime)
+void Hail::ScriptManager::Update(float deltaTime, ScriptFrameAccessibleData& scriptFrameAccessibleData)
 {
+    g_pScriptFrameAccessibleData = &scriptFrameAccessibleData;
     //m_pRunner->RunScript("FirstScript");
     m_pRunner->UpdateScriptReloadWatcher();
     m_pRunner->UpdateCapabilityScriptReloadWatcher();
@@ -154,6 +163,10 @@ bool Hail::ScriptManager::RegisterGameScriptClasses(AngelScript::TypeRegistry* p
     H_ASSERT(bResult, "Failed to register global func");
     bResult = pTypeRegistry->RegisterGlobalMethod({ "RemoveCapabilityFromEntity", "void" }, { {"entityHandle", "uint" }, {"capabilityName", "string" } }, asFUNCTION(LocalRemoveCapabilityFromEntity), H_FILE_LINE);
     H_ASSERT(bResult, "Failed to register global func");
+   
+    bResult = pTypeRegistry->RegisterGlobalMethod({ "GetCamera2D", "Camera2D", false, true }, {}, asFUNCTION(LocalGetCamera2D), H_FILE_LINE);
+    H_ASSERT(bResult, "Failed to register global func");
+
     return true;
 }
 

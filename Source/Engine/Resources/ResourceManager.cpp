@@ -220,7 +220,7 @@ void Hail::ResourceManager::UpdateRenderBuffers(RenderCommandPool& renderPool, R
 	perFrameData.mainWindowResolution = m_swapChain->GetSwapChainResolution();
 	perFrameData.renderTargetRes = m_swapChain->GetTargetResolution();
 	perFrameData.deltaTime_cameraZoom = glm::vec2(deltaTime, renderPool.camera2D.GetZoom());
-	perFrameData.cameraPos = renderPool.camera2D.GeNormalizedtPosition();
+	perFrameData.cameraPos = renderPool.camera2D.GetNormalizedPosition();
 	perFrameData.mousePos = glm::vec2((float)GetInputHandler().GetInputMap().mouse.mousePos.x / (float)perFrameData.mainWindowResolution.x,
 		(float)GetInputHandler().GetInputMap().mouse.mousePos.y / (float)perFrameData.mainWindowResolution.y);
 

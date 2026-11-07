@@ -7,18 +7,18 @@ namespace Hail
 	struct GameCommand_Sprite
 	{
 		Transform2D transform;
-		Color color = Color({ 1.0f, 1.0f, 1.0f, 1.0f });
 		uint32 index;
-		glm::vec2 pivot = { 0.5f, 0.5f };
 		glm::vec4 uvTR_BL = { 0.0, 0.0, 1.0, 1.0 };
+		glm::vec2 pivot = { 0.5f, 0.5f };
+		Color color = Color({ 1.0f, 1.0f, 1.0f, 1.0f });
 		uint32_t materialInstanceID = MAX_UINT;
-		bool bSizeRelativeToRenderTarget = true;
 		int m_layer{ 0 };
-		bool bLerpCommand = true;
+		bool bSizeRelativeToRenderTarget = true;
 		// true the scale will be in normalized size, so a size of 0.1 will always stay 0.1 of the screen percentage
 		// false the scale will be of the texture size on the render target, so the texture will be scaled by the scale, 
 		// false best used with UI or elements that should not scale with screen resolution
 		bool bIsAffectedBy2DCamera = true;
+		bool bLerpCommand = true;
 	};
 
 	struct GameCommand_Text

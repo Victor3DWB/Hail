@@ -10,6 +10,7 @@ namespace Hail
 	class CapabilitySystem;
 	class ComponentManager;
 	class EntityManager;
+	class Camera2D;
 
 	namespace AngelScript
 	{
@@ -17,6 +18,11 @@ namespace Hail
 		class Handler;
 		class Runner;
 	}
+
+	struct ScriptFrameAccessibleData
+	{
+		Camera2D* m_pGame2DCamera = nullptr;
+	};
 
 	class ScriptManager
 	{
@@ -33,7 +39,7 @@ namespace Hail
 		bool Init(InitParams initParams);
 		void Cleanup();
 
-		void Update(float deltaTime);
+		void Update(float deltaTime, ScriptFrameAccessibleData& scriptFrameAccessibleData);
 
 		Capability* CreateCapability(CapabilityCreationRequest capabilityCreationRequest);
 		const FilePath& GetScriptFilePathForCapability(const String64& capabilityName);

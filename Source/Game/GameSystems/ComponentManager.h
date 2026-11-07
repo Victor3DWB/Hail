@@ -10,6 +10,7 @@ namespace Hail
 	enum class EComponentType
 	{
 		PhysicsComponent,
+		SpriteComponent,
 		AnngelScriptCapabilityComponent
 	};
 
@@ -24,10 +25,13 @@ namespace Hail
 		void AddComponentToEntity(EntityHandle entityHandle, EComponentType componentToAdd);
 
 		PhysicsComponent* GetPhysicsComponent(EntityHandle entityHandle);
-		AngelscriptCapabilityComponent* GetAngelscriptCapabilityComponent(EntityHandle entityHandle);
+		SpriteComponent* GetSpriteComponent(EntityHandle entityHandle);
 		Hail::ComponentArray<PhysicsComponent>& GetPhysicsComponents() { return m_physicsComponents; }
+		Hail::ComponentArray<SpriteComponent>& GetSpriteComponents() { return m_spriteComponents; };
 
+		
 		// TODO: Create return angelscriptComponentFunctions
+		AngelscriptCapabilityComponent* GetAngelscriptCapabilityComponent(EntityHandle entityHandle);
 		AngelscriptComponent* ComponentManager::GetAngelscriptComponent(EntityHandle entity, uint32 componentTypeId);
 		AngelscriptComponent* ComponentManager::GetOrCreateAngelscriptComponent(EntityHandle entity, uint32 componentTypeId, asIScriptEngine* pScriptEngine);
 		bool HasAngelscriptComponent(EntityHandle entity, uint32 componentTypeId);
@@ -37,6 +41,7 @@ namespace Hail
 	private:
 
 		Hail::ComponentArray<PhysicsComponent> m_physicsComponents;
+		Hail::ComponentArray<SpriteComponent> m_spriteComponents;
 		Hail::ComponentArray<AngelscriptCapabilityComponent> m_capabilityComponents;
 
 		struct AngelscriptComponentType

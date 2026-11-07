@@ -5,6 +5,7 @@
 #include "Array.h"
 #include "Math.h"
 #include "TypeRegistry.h"
+#include "Camera.h"
 
 #include <new>
 #include "Input\InputActionList.h"
@@ -225,12 +226,11 @@ void Hail::AngelScript::Handler::RegisterGlobalMessages()
 	bResult = m_pTypeRegistry->RegisterGlobalMethod({ "PrintError", "void" }, { {"text", "string", true, true, true } }, asFUNCTION(localPrintError), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register global func");
 	bResult = m_pTypeRegistry->RegisterGlobalMethod({ "PrintWarning", "void" }, { {"text", "string", true, true, true } }, asFUNCTION(localPrintWarning), H_FILE_LINE);  H_ASSERT(bResult, "Failed to register global func");
 	
-	// Vector2
 	RegisterAngelScriptVectorType();
-
 	RegisterAngelScriptTransform2D();
-	// Math
+	// Misc math functions
 	RegisterScriptMath(m_pScriptEngine);
+	RegisterAngelScriptCamera2D();
 
 	// Input handling
 	// Input Enum
@@ -476,6 +476,48 @@ void Hail::AngelScript::Handler::RegisterAngelScriptTransform2D()
 	bResult = m_pTypeRegistry->RegisterClassMethod("Transform2D", { "AddToScale", "void" }, { { "in", "Vec2", true, true } }, asFUNCTION(Transform2D_AddToScale), asCALL_CDECL_OBJFIRST, H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Transform func");
 	
 	bResult = m_pTypeRegistry->RegisterClassMethod("Transform2D", { "LookAt", "void" }, { { "in", "Vec2", true, true } }, asFUNCTION(Transform2D_LookAt), asCALL_CDECL_OBJFIRST, H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Transform func");
+}
+
+static Vec2 Camera2D_GetResolution(Camera2D* pCamera)
+{
+	Vec2 pos = glm::vec2((float)pCamera->GetResolution().x, (float)pCamera->GetResolution().y);
+	return pos;
+}
+
+static void Camera2D_SetResolution(Camera2D* pCamera, uint32 x, uint32 y)
+{
+	const glm::uvec2 resolution(x, y);
+	pCamera->SetResolution(resolution);
+}
+
+static Vec2 Camera2D_GetPosition(Camera2D* pCamera)
+{
+	Vec2 pos = pCamera->GetPosition();
+	return pos;
+}
+
+static Vec2 Camera2D_GetNormalizedPosition(Camera2D* pCamera)
+{
+	Vec2 pos = pCamera->GetNormalizedPosition();
+	return pos;
+}
+
+static void Camera2D_SetPosition(Camera2D* pCamera, const Vec2& pos)
+{
+	pCamera->SetPosition(pos.m_vec);
+}
+
+void Hail::AngelScript::Handler::RegisterAngelScriptCamera2D()
+{
+	bool bResult;
+	bResult = m_pTypeRegistry->RegisterType("Camera2D", 0, asOBJ_REF | asOBJ_NOCOUNT, H_FILE_LINE); H_ASSERT(bResult, "Failed to register Camera func");
+	bResult = m_pTypeRegistry->RegisterClassMethod("Camera2D", { "GetResolution", "Vec2" }, {}, asFUNCTION(Camera2D_GetResolution), asCALL_CDECL_OBJFIRST, H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Camera func");
+	bResult = m_pTypeRegistry->RegisterClassMethod("Camera2D", { "SetResolution", "void" }, { { "x", "uint" }, { "y", "uint" } }, asFUNCTION(Camera2D_SetResolution), asCALL_CDECL_OBJFIRST, H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Camera func");
+	bResult = m_pTypeRegistry->RegisterClassMethod("Camera2D", { "GetPosition", "Vec2" }, {}, asFUNCTION(Camera2D_GetPosition), asCALL_CDECL_OBJFIRST, H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Camera func");
+	bResult = m_pTypeRegistry->RegisterClassMethod("Camera2D", { "GetNormalizedPosition", "Vec2" }, {}, asFUNCTION(Camera2D_GetNormalizedPosition), asCALL_CDECL_OBJFIRST, H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Camera func");
+	bResult = m_pTypeRegistry->RegisterClassMethod("Camera2D", { "SetPosition", "void" }, { { "in", "Vec2", true, true } }, asFUNCTION(Camera2D_SetPosition), asCALL_CDECL_OBJFIRST, H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Camera func");
+	bResult = m_pTypeRegistry->RegisterClassMethod("Camera2D", { "GetZoom", "float" }, {}, asMETHOD(Camera2D, GetZoom), asCALL_THISCALL, H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Camera func");
+	bResult = m_pTypeRegistry->RegisterClassMethod("Camera2D", { "SetZoom", "void" }, { { "zoom", "float" } }, asMETHOD(Camera2D, SetZoom), asCALL_THISCALL, H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Camera func");
 }
 
 Hail::AngelScript::Vec2::Vec2() : m_vec(0) {}

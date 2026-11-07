@@ -21,6 +21,7 @@
 #include "Reflection/Reflection.h"
 
 #include "GameSystems/ComponentArray.h"
+#include "GameSystems/SpriteSystem.h"
 
 #include "angelscript.h"
 #include "AngelScript/Handler.h"
@@ -32,9 +33,9 @@ namespace
 	Hail::Camera2D g_2DCamera;
 	float g_movementSpeed = 10.0f;
 	float g_spriteMovementSpeed = 5.0f;
-	Hail::GameCommand_Sprite player;
-	Hail::GameCommand_Sprite sprites[5];
-	Hail::GameCommand_Sprite manySprites[100];
+	//Hail::GameCommand_Sprite player;
+	//Hail::GameCommand_Sprite sprites[5];
+	Hail::GameCommand_Sprite g_backgroundSprite;
 	bool renderPlayer = true;
 	Hail::ImGuiFileBrowserData g_fileBrowserData;
 
@@ -51,17 +52,20 @@ namespace
 	Hail::EntityHandle g_playerHandle;
 	Hail::EntityHandle g_linePhysicsEntities[2];
 	Hail::EntityHandle g_spherePhysicsEntities[5];
+
+	// Stable data so that the script systems pointer is correct, might update to a per frame structure
+	Hail::ScriptFrameAccessibleData g_scriptAccessibleFrameData;
 }
 
 namespace Hail
 {
 	void GameApplication::PostInit()
 	{
-		sprites[0].materialInstanceID = Hail::ResourceInterface::GetMaterialInstanceResourceHandle(backgroundGuid);
-		player.materialInstanceID = Hail::ResourceInterface::GetMaterialInstanceResourceHandle(spaceShipGuid);
-		for (size_t i = 1; i < 5; i++)
+		g_backgroundSprite.materialInstanceID = Hail::ResourceInterface::GetMaterialInstanceResourceHandle(backgroundGuid);
+		m_componentManager.GetSpriteComponent(g_playerHandle)->m_materialInstanceID = Hail::ResourceInterface::GetMaterialInstanceResourceHandle(spaceShipGuid);
+		for (size_t i = 0; i < 5; i++)
 		{
-			sprites[i].materialInstanceID = Hail::ResourceInterface::GetMaterialInstanceResourceHandle(debugGridGuid);
+			m_componentManager.GetSpriteComponent(g_spherePhysicsEntities[i])->m_materialInstanceID = Hail::ResourceInterface::GetMaterialInstanceResourceHandle(debugGridGuid);
 		}
 	}
 
@@ -124,44 +128,6 @@ namespace Hail
 
 		g_camera.GetTransform() = glm::lookAt(glm::vec3(300.0f, 300.0f, 300.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		m_inputMapping = *pAppInitData->m_pInputMapping;
-		player.transform.SetPosition({ 0.5f, 0.5f });
-		player.bSizeRelativeToRenderTarget = false;
-		player.transform.SetScale({ 1.f, 1.f });
-		player.m_layer = 0;
-		//sprites[0].materialInstanceID = 2;
-		sprites[0].transform.SetPosition({ 0.5f, 0.5f });
-		sprites[0].m_layer = -1;
-		sprites[0].bIsAffectedBy2DCamera = false;
-		sprites[0].bSizeRelativeToRenderTarget = true;
-		sprites[0].transform.SetScale({ 1.f, 1.f });
-
-		sprites[1].transform.SetPosition({ -400, -200 });
-		sprites[2].transform.SetPosition({ 200, 200 });
-		sprites[3].transform.SetPosition({ -200, 200 });
-		sprites[4].transform.SetPosition({ 200, -200 });
-		for (uint32_t i = 1; i < 5; i++)
-		{
-			sprites[i].transform.SetRotationRad({ i * Math::PIf * 0.25f });
-			sprites[i].index = i + 1;
-			sprites[i].transform.SetScale({ 0.25, 0.25 });
-			sprites[i].m_layer = 1;
-		}
-
-		for (int x = 0; x < 10; x++)
-		{
-			for (int y = 0; y < 10; y++)
-			{
-				int i = x + y * 10;
-				manySprites[i].transform.SetRotationRad({ i * 0.25f });
-				manySprites[i].transform.SetRotationRad({ i * 0.25f });
-				manySprites[i].index = 5 + i;
-				manySprites[i].transform.SetScale({ 0.15, 0.15 });
-				manySprites[i].transform.SetPosition({ (float)x * 40.1f , (float)y * 40.1f });
-				manySprites[i].bSizeRelativeToRenderTarget = true;
-				manySprites[i].m_layer = 0;
-				manySprites[i].materialInstanceID = sprites[3].materialInstanceID;
-			}
-		}
 
 		g_fileBrowserData.extensionsToSearchFor = { "tga", "frag", "vert" };
 		g_fileBrowserData.pathToBeginSearchingIn = FilePath::GetResourceSourceDirectory();
@@ -203,31 +169,25 @@ namespace Hail
 		m_componentManager.AddComponentToEntity(m_entityManager.GetEntityFromIndex(g_linePhysicsEntities[1]).GetId(), EComponentType::PhysicsComponent);
 		*m_componentManager.GetPhysicsComponent(m_entityManager.GetEntityFromIndex(g_linePhysicsEntities[1]).GetId()) = m_physicsSystem.CreatePhysicsLineComponent(lineData, linePhysicsProperties);
 
-		g_spherePhysicsEntities[0] = m_entityManager.CreateEntity();
-		m_entityManager.GetEntityFromIndex(g_spherePhysicsEntities[0]).m_transform.SetPosition({ -80.f, -350.f });
-		g_spherePhysicsEntities[1] = m_entityManager.CreateEntity();
-		m_entityManager.GetEntityFromIndex(g_spherePhysicsEntities[1]).m_transform.SetPosition({ 80.f, -350.f });
-		g_spherePhysicsEntities[2] = m_entityManager.CreateEntity();
-		m_entityManager.GetEntityFromIndex(g_spherePhysicsEntities[2]).m_transform.SetPosition({ -40.f, -100.f });
-		g_spherePhysicsEntities[3] = m_entityManager.CreateEntity();
-		m_entityManager.GetEntityFromIndex(g_spherePhysicsEntities[3]).m_transform.SetPosition({ 0.f, -100.f });
-		g_spherePhysicsEntities[4] = m_entityManager.CreateEntity();
-		m_entityManager.GetEntityFromIndex(g_spherePhysicsEntities[4]).m_transform.SetPosition({ 40.f, -100.f });
+		const glm::vec2 spawnPositions[5] = { { -80.f, -350.f }, { 80.f, -350.f }, { -40.f, -100.f }, { 0.f, -100.f }, { 40.f, -100.f } };
+
+		for (uint32 i = 0; i < 5; i++)
+		{
+			g_spherePhysicsEntities[i] = m_entityManager.CreateEntity();
+			m_entityManager.GetEntityFromIndex(g_spherePhysicsEntities[i]).m_transform.SetPosition(spawnPositions[i]);
+			m_entityManager.GetEntityFromIndex(g_spherePhysicsEntities[i]).m_transform.SetScale({0.25, 0.25});
+		}
 
 		PhysicsCollisionProperties circlePhysicsProperties;
 		circlePhysicsProperties.m_mass = 10.0f;
 		PhysicsCircleData circlePhysicsData;
 		circlePhysicsData.m_radius = 20.015;
-		m_componentManager.AddComponentToEntity(m_entityManager.GetEntityFromIndex(g_spherePhysicsEntities[0]).GetId(), EComponentType::PhysicsComponent);
-		*m_componentManager.GetPhysicsComponent(m_entityManager.GetEntityFromIndex(g_spherePhysicsEntities[0]).GetId()) = m_physicsSystem.CreatePhysicsCircleComponent(circlePhysicsData, circlePhysicsProperties);
-		m_componentManager.AddComponentToEntity(m_entityManager.GetEntityFromIndex(g_spherePhysicsEntities[1]).GetId(), EComponentType::PhysicsComponent);
-		*m_componentManager.GetPhysicsComponent(m_entityManager.GetEntityFromIndex(g_spherePhysicsEntities[1]).GetId()) = m_physicsSystem.CreatePhysicsCircleComponent(circlePhysicsData, circlePhysicsProperties);
-		m_componentManager.AddComponentToEntity(m_entityManager.GetEntityFromIndex(g_spherePhysicsEntities[2]).GetId(), EComponentType::PhysicsComponent);
-		*m_componentManager.GetPhysicsComponent(m_entityManager.GetEntityFromIndex(g_spherePhysicsEntities[2]).GetId()) = m_physicsSystem.CreatePhysicsCircleComponent(circlePhysicsData, circlePhysicsProperties);
-		m_componentManager.AddComponentToEntity(m_entityManager.GetEntityFromIndex(g_spherePhysicsEntities[3]).GetId(), EComponentType::PhysicsComponent);
-		*m_componentManager.GetPhysicsComponent(m_entityManager.GetEntityFromIndex(g_spherePhysicsEntities[3]).GetId()) = m_physicsSystem.CreatePhysicsCircleComponent(circlePhysicsData, circlePhysicsProperties);
-		m_componentManager.AddComponentToEntity(m_entityManager.GetEntityFromIndex(g_spherePhysicsEntities[4]).GetId(), EComponentType::PhysicsComponent);
-		*m_componentManager.GetPhysicsComponent(m_entityManager.GetEntityFromIndex(g_spherePhysicsEntities[4]).GetId()) = m_physicsSystem.CreatePhysicsCircleComponent(circlePhysicsData, circlePhysicsProperties);
+		for (uint32 iTestEntites = 0; iTestEntites < 5; iTestEntites++)
+		{
+			m_componentManager.AddComponentToEntity(m_entityManager.GetEntityFromIndex(g_spherePhysicsEntities[iTestEntites]).GetId(), EComponentType::PhysicsComponent);
+			m_componentManager.AddComponentToEntity(m_entityManager.GetEntityFromIndex(g_spherePhysicsEntities[iTestEntites]).GetId(), EComponentType::SpriteComponent);
+			*m_componentManager.GetPhysicsComponent(m_entityManager.GetEntityFromIndex(g_spherePhysicsEntities[iTestEntites]).GetId()) = m_physicsSystem.CreatePhysicsCircleComponent(circlePhysicsData, circlePhysicsProperties);
+		}
 
 		g_playerHandle = m_entityManager.CreateEntity();
 		CapabilityCreationRequest capabilityRequest;
@@ -240,8 +200,25 @@ namespace Hail
 			m_capabilitySystem.RegisterCapabilityToEntity(g_playerHandle, pCapability);
 		}
 		m_componentManager.AddComponentToEntity(g_playerHandle, EComponentType::PhysicsComponent);
+		m_componentManager.AddComponentToEntity(g_playerHandle, EComponentType::SpriteComponent);
 		circlePhysicsProperties.m_mass = 0.0f;
 		*m_componentManager.GetPhysicsComponent(g_playerHandle) = m_physicsSystem.CreatePhysicsCircleComponent(circlePhysicsData, circlePhysicsProperties);
+
+		m_componentManager.GetSpriteComponent(g_playerHandle)->m_bSizeRelativeToRenderTarget = false;
+		m_componentManager.GetSpriteComponent(g_playerHandle)->m_layer = 2;
+
+		for (uint32_t i = 0; i < 5; i++)
+		{
+			m_componentManager.GetSpriteComponent(g_spherePhysicsEntities[i])->m_bIsAffectedBy2DCamera = true;
+			m_componentManager.GetSpriteComponent(g_spherePhysicsEntities[i])->m_bSizeRelativeToRenderTarget = false;
+			m_componentManager.GetSpriteComponent(g_spherePhysicsEntities[i])->m_layer = 1;
+		}
+
+		g_backgroundSprite.transform.SetPosition({ 0.5f, 0.5f });
+		g_backgroundSprite.m_layer = -1;
+		g_backgroundSprite.bIsAffectedBy2DCamera = false;
+		g_backgroundSprite.bSizeRelativeToRenderTarget = true;
+		g_backgroundSprite.transform.SetScale({ 1.f, 1.f });
 	}
 
 	bool g_bTest = false;
@@ -261,24 +238,22 @@ namespace Hail
 		physicsUpdate.p_commandPoolToFill = frameData.commandPoolToFill;
 		m_physicsSystem.UpdatePhysicsWorld(physicsUpdate);
 
-		m_scriptManager.Update(deltaTime);
+		g_scriptAccessibleFrameData.m_pGame2DCamera = &g_2DCamera;
+
+		m_scriptManager.Update(deltaTime, g_scriptAccessibleFrameData);
 		m_capabilitySystem.Update(deltaTime);
 
 
-		if (sprites[0].materialInstanceID == MAX_UINT && Hail::ResourceInterface::GetMaterialResourceState(backgroundGuid) == eResourceState::Loaded)
-			sprites[0].materialInstanceID = Hail::ResourceInterface::GetMaterialInstanceResourceHandle(backgroundGuid);
-		if (player.materialInstanceID == MAX_UINT && Hail::ResourceInterface::GetMaterialResourceState(spaceShipGuid) == eResourceState::Loaded)
-			player.materialInstanceID = Hail::ResourceInterface::GetMaterialInstanceResourceHandle(spaceShipGuid);
-		for (size_t i = 1; i < 5; i++)
+		if (g_backgroundSprite.materialInstanceID == MAX_UINT && Hail::ResourceInterface::GetMaterialResourceState(backgroundGuid) == eResourceState::Loaded)
+			g_backgroundSprite.materialInstanceID = Hail::ResourceInterface::GetMaterialInstanceResourceHandle(backgroundGuid);
+		if (m_componentManager.GetSpriteComponent(g_playerHandle)->m_materialInstanceID == MAX_UINT && Hail::ResourceInterface::GetMaterialResourceState(spaceShipGuid) == eResourceState::Loaded)
+			m_componentManager.GetSpriteComponent(g_playerHandle)->m_materialInstanceID = Hail::ResourceInterface::GetMaterialInstanceResourceHandle(spaceShipGuid);
+		for (size_t i = 0; i < 5; i++)
 		{
-			if (sprites[i].materialInstanceID == MAX_UINT && Hail::ResourceInterface::GetMaterialResourceState(debugGridGuid) == eResourceState::Loaded)
-				sprites[i].materialInstanceID = Hail::ResourceInterface::GetMaterialInstanceResourceHandle(debugGridGuid);
+			if (m_componentManager.GetSpriteComponent(g_spherePhysicsEntities[i])->m_materialInstanceID == MAX_UINT && Hail::ResourceInterface::GetMaterialResourceState(debugGridGuid) == eResourceState::Loaded)
+				m_componentManager.GetSpriteComponent(g_spherePhysicsEntities[i])->m_materialInstanceID = Hail::ResourceInterface::GetMaterialInstanceResourceHandle(debugGridGuid);
 		}
-		for (size_t i = 0; i < 50; i++)
-		{
-			if (manySprites[i].materialInstanceID == MAX_UINT && Hail::ResourceInterface::GetMaterialResourceState(debugGridGuid) == eResourceState::Loaded)
-				manySprites[i].materialInstanceID = Hail::ResourceInterface::GetMaterialInstanceResourceHandle(debugGridGuid);
-		}
+
 
 		g_2DCamera.SetResolution(frameData.commandPoolToFill->camera2D.GetResolution());
 		//Make Gawme ^^
@@ -339,7 +314,6 @@ namespace Hail
 		recievedFrameData.imguiCommandRecorder->AddCloseCommand();
 
 
-
 		if (frameData.inputActionMap->GetButtonInput(eInputAction::PlayerAction1) == Hail::eInputState::Pressed)
 		{
 			g_camera.GetTransform().AddToPosition(glm::vec3{ 0.0, 0.0, 1.0 } *g_movementSpeed);
@@ -350,68 +324,18 @@ namespace Hail
 		{
 			g_camera.GetTransform().AddToPosition(glm::vec3{ 0.0, 0.0, -1.0 } *g_movementSpeed);
 		}
-		glm::vec2 direction = frameData.inputActionMap->GetDirectionInput(eInputAction::PlayerMoveJoystickL);
-		direction.y *= (-1.0f);
-		bool moved = false;
-
-
-		if (direction.x != 0.0 || direction.y != 0.0f)
-			moved = true;
 
 		{
 			const glm::vec2 oldCameraPos = g_2DCamera.GetPosition();
 			const glm::vec2 directionRStick = frameData.inputActionMap->GetDirectionInput(eInputAction::PlayerMoveJoystickR);
-			g_2DCamera.SetPosition(oldCameraPos + glm::vec2(directionRStick.x, directionRStick.y * -1.0f) * 10.f);
+			//g_2DCamera.SetPosition(oldCameraPos + glm::vec2(directionRStick.x, directionRStick.y * -1.0f) * 10.f);
 		}
 
-		if (frameData.inputActionMap->GetButtonInput(eInputAction::PlayerMoveLeft) == Hail::eInputState::Down)
-		{
-			direction += (glm::vec2{ -1.0, 0.0 });
-			moved = true;
-		}
-		if (frameData.inputActionMap->GetButtonInput(eInputAction::PlayerMoveRight) == Hail::eInputState::Down)
-		{
-			direction += (glm::vec2{ 1.0, 0.0 });
-			moved = true;
-		}
-		if (frameData.inputActionMap->GetButtonInput(eInputAction::PlayerMoveUp) == Hail::eInputState::Down)
-		{
-			direction += (glm::vec2{ 0.0, -1.0 });
-			moved = true;
-		}
-		if (frameData.inputActionMap->GetButtonInput(eInputAction::PlayerMoveDown) == Hail::eInputState::Down)
-		{
-			direction += glm::vec2{ 0.0, 1.0 };
-			moved = true;
-		}
-
-		if (moved)
-		{
-			direction = glm::normalize(direction);
-			player.transform.AddToPosition(direction * g_spriteMovementSpeed);
-			player.transform.LookAt(direction);
-		}
 		if (frameData.inputActionMap->GetButtonInput(eInputAction::PlayerPause) == Hail::eInputState::Released)
 		{
 			renderPlayer = !renderPlayer;
 		}
 
-		if (frameData.inputActionMap->GetButtonInput(eInputAction::DebugAction1) == Hail::eInputState::Released)
-		{
-			H_ERROR("Error frome game");
-		}
-		if (frameData.inputActionMap->GetButtonInput(eInputAction::DebugAction2) == Hail::eInputState::Released)
-		{
-			H_WARNING("Warning frome game");
-		}
-
-		player.color.SetA(sinf(totalTime) * 0.5 + 0.5f);
-
-		for (uint32_t i = 1; i < 5; i++)
-		{
-			sprites[i].transform.AddToRotationEuler({ 0.15f * (i + 1) });
-			//DrawLine2DPixelSpace(*frameData.commandPoolToFill, sprites[i].transform.GetPosition(), sprites[i].transform.GetRotationRad(), 10.f * (i * 10.f), true);
-		}
 		FillFrameData(*frameData.commandPoolToFill);
 		g_frameCounter++;
 	}
@@ -435,21 +359,21 @@ namespace Hail
 	void GameApplication::FillFrameData(Hail::ApplicationCommandPool& commandPoolToFill)
 	{
 		commandPoolToFill.camera3D = g_camera;
-		for (uint32_t i = 0; i < 1; i++)
-		{
-			commandPoolToFill.AddSpriteCommand(sprites[i]);
-		}
-		//for (uint32_t i = 0; i < 100; i++)
-		//{
-		//	commandPoolToFill.AddSpriteCommand(manySprites[i]);
-		//}
+		commandPoolToFill.AddSpriteCommand(g_backgroundSprite);
+
+		SpriteUpdatePayload spriteUpdatePayload;
+		spriteUpdatePayload.m_pSpriteComponents = &m_componentManager.GetSpriteComponents();
+		spriteUpdatePayload.p_commandPoolToFill = &commandPoolToFill;
+
+		UpdateSpriteComponents(spriteUpdatePayload);
+
 		if (renderPlayer)
 		{
-			commandPoolToFill.AddSpriteCommand(player);
-			commandPoolToFill.playerPosition = player.transform.GetPosition();
-			g_textCounter.transform.SetPosition(player.transform.GetPosition() + glm::vec2(-140, -55));
-			g_textCounterNumber.transform.SetPosition(player.transform.GetPosition() + glm::vec2(30, -55));
-			//DrawCircle2DPixelSpace(commandPoolToFill, player.transform.GetPosition(), 10.0f, true);
+			const Entity& playerEntity = m_entityManager.GetEntityFromIndex(g_playerHandle);
+			commandPoolToFill.playerPosition = playerEntity.m_transform.GetPosition();
+
+			g_textCounter.transform.SetPosition(playerEntity.m_transform.GetPosition() + glm::vec2(-140, -55));
+			g_textCounterNumber.transform.SetPosition(playerEntity.m_transform.GetPosition() + glm::vec2(30, -55));
 			commandPoolToFill.AddTextCommand(g_textCounter);
 			commandPoolToFill.AddTextCommand(g_textCounterNumber);
 		}

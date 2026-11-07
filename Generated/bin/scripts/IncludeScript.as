@@ -244,7 +244,7 @@ class PlayerMovementCapability : Capability
         }
         
         m_pos = m_pos + playerComponent.m_velocity;
-
+        GetCamera2D().SetPosition(m_pos);
         Transform2D@ playerTransform = GetEntityTransform(GetOwningEntity());
         playerTransform.SetPosition(m_pos);
         

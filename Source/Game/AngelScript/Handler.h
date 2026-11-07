@@ -68,6 +68,7 @@ namespace Hail
 			void RegisterGlobalMessages();
 			void RegisterAngelScriptVectorType();
 			void RegisterAngelScriptTransform2D();
+			void RegisterAngelScriptCamera2D();
 
 			const bool m_bEnableDebugger;
 			asIScriptEngine* m_pScriptEngine;
