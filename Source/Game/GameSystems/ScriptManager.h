@@ -7,10 +7,11 @@ class asIScriptEngine;
 
 namespace Hail
 {
+	class Camera2D;
 	class CapabilitySystem;
 	class ComponentManager;
 	class EntityManager;
-	class Camera2D;
+	class PhysicsSystem;
 
 	namespace AngelScript
 	{
@@ -34,6 +35,7 @@ namespace Hail
 			EntityManager* m_pEntityManager;
 			ComponentManager* m_pComponentManager;
 			CapabilitySystem* m_pCapabilitySystem;
+			PhysicsSystem* m_pPhysicsSystem;
 		};
 
 		bool Init(InitParams initParams);
@@ -55,7 +57,8 @@ namespace Hail
 		ComponentManager* m_pComponentManager;
 		asIScriptEngine* m_pScriptEngine;
 		bool RegisterGameScriptClasses(AngelScript::TypeRegistry* pTypeRegistry);
-
+		bool RegisterCommonComponentsAndMembers(AngelScript::TypeRegistry* pTypeRegistry);
+		
 
 	};
 	

@@ -43,8 +43,8 @@ namespace Hail
 
 		const WString256& Name() const { return m_name; }
 		const WString256& ParentName() const { return m_parentName; }
-		const WString64& Extension() const { return m_extension; }
-		void SetExtension(WString64 newExtension);
+		const StringLW& Extension() const { return m_extension; }
+		void SetExtension(const wchar_t* pNewExtension);
 		bool IsDirectory() const { return m_isDirectory; }
 		bool IsValid() const;
 		bool IsFile() const { return !m_isDirectory; }
@@ -61,7 +61,7 @@ namespace Hail
 
 		WString256 m_name;
 		WString256 m_parentName;
-		WString64 m_extension;
+		StringLW m_extension;
 		CommonFileData m_fileData;
 		bool m_isDirectory;
 		uint16_t m_directoryLevel;

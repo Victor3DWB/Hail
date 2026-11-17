@@ -15,10 +15,10 @@ namespace Hail
 	{
 		class Handler;
 	}
+	class ApplicationCommandPool;
 
 	struct ApplicationFrameData;
 	struct RecordedImGuiCommands;
-	struct ApplicationCommandPool;
 	struct InputMapping;
 
 	class GameApplication

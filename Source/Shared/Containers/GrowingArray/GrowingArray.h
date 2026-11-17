@@ -25,6 +25,7 @@ namespace Hail
 		//Increments the counter to match the capacity of the internal array.
 		void Fill();
 
+		void Swap(GrowingArray& other);
 		// Creates the memory on the heap for X amount of items, if it already has that capacity nothing happens.
 		void Prepare(CountType numberOfItemsToInit);
 		void PrepareAndFill(CountType numberOfItemsToInit);
@@ -186,6 +187,22 @@ namespace Hail
 	inline void GrowingArray<T, CountType>::Fill()
 	{
 		m_elementCount = m_capacity;
+	}
+
+	template<typename T, typename CountType>
+	inline void GrowingArray<T, CountType>::Swap(GrowingArray& other)
+	{
+		const size_t previousCount = m_elementCount;
+		const size_t previousCapacity = m_capacity;
+		T* pPreviousArrayPointer = m_arrayPointer;
+
+		m_elementCount = other.m_elementCount;
+		m_capacity = other.m_capacity;
+		m_arrayPointer = other.m_arrayPointer;
+
+		other.m_elementCount = previousCount;
+		other.m_capacity = previousCapacity;
+		other.m_arrayPointer = pPreviousArrayPointer;
 	}
 
 	template <typename T, typename CountType>

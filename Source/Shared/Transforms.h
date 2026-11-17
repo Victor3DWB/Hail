@@ -64,9 +64,10 @@ namespace Hail
 
 		__forceinline float GetRotationEuler() const { return m_rot * Math::RadToDegf + 90.f; };
 		__forceinline float GetRotationRad() const { return m_rot; };
-		__forceinline glm::vec2 GetScale()	const { return m_scl; };
-		__forceinline glm::vec2 GetPosition() const { return m_pos; };
-
+		__forceinline const glm::vec2& GetScale()	const { return m_scl; };
+		__forceinline const glm::vec2& GetPosition() const { return m_pos; };
+		__forceinline glm::vec2 GetForward() const { return glm::vec2(cos(m_rot), sin(m_rot)); }
+		__forceinline glm::vec2 GetRight() const { return glm::vec2(-sin(m_rot), cos(m_rot)); }
 		static const Transform2D LerpTransforms(const Transform2D& tr1, const Transform2D& tr2, const float t);
 
 		void SetPosition(const glm::vec2 pos);

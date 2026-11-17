@@ -369,17 +369,19 @@ Hail::FilePath& Hail::FilePath::operator+=(const FileObject& object)
             m_data[--m_length] = L'\0';
         }
         length += object.Name().Length();
-        wcscat_s(m_data, MAX_FILE_LENGTH - m_length, object.Name());
+        wcscat_s(m_data, m_length + length + 1, object.Name());
         if (object.IsDirectory())
         {
             m_data[m_length + length++] = g_SourceSeparator;
         }
         else
         {
+
             m_data[m_length + length++] = L'.';
             m_data[m_length + length] = g_End;
-            length += object.Extension().Length();
-            wcscat_s(m_data, MAX_FILE_LENGTH - (m_length + length), object.Extension());
+            // Add 1 for null terminating character
+            length += object.Extension().Length() + 1;
+            wcscat_s(m_data, m_length + length, object.Extension().Data());
         }
         m_data[m_length + length] = g_End;
         m_length += length;
@@ -486,7 +488,7 @@ void Hail::FilePath::ReplaceExtension(WString64 newExtension)
 
     memcpy(&m_data[m_length], newExtension.Data(), newExtension.Length() * sizeof(wchar_t));
     m_length += newExtension.Length();
-
+    m_data[m_length + 1] = g_End;
     m_object.SetExtension(newExtension);
 }
 
@@ -535,11 +537,11 @@ void Hail::FilePath::FindExtension(bool useFileObjectsExtension)
     CreateFileObject();
 }
 
-void Hail::FileObject::SetExtension(WString64 newExtension)
+void Hail::FileObject::SetExtension(const wchar_t* pNewExtension)
 {
     if (!m_isDirectory)
     {
-        m_extension = newExtension;
+        m_extension = pNewExtension;
     }
 }
 
@@ -646,8 +648,7 @@ Hail::FileObject::FileObject(const FilePath& filePath)
             currentCharacter = m_name[seperator--];
         }
         const uint32_t fileExtensionLength = m_name.Length() != 0 ? m_name.Length() - (seperator + 1) : 0;
-        memcpy(m_extension, m_name + seperator + 1, sizeof(wchar_t) * fileExtensionLength);
-        m_extension[fileExtensionLength] = g_End;
+        m_extension = m_name + seperator + 1;
         memset(m_name + seperator, 0, sizeof(wchar_t) * (fileExtensionLength + 1));
     }
 
@@ -695,7 +696,7 @@ Hail::FileObject::FileObject(const char* const name, const char* extension, cons
     memcpy(m_parentName, parentObject.m_name, sizeof(m_parentName));
 
     FromConstCharToWChar(name, m_name, 64);
-    FromConstCharToWChar(extension, m_extension, 64);
+    m_extension = extension;
     m_isDirectory = false;
 
 }

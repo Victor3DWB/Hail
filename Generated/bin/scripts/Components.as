@@ -13,4 +13,5 @@ shared class PlayerComponent : Component
     float m_flipDuration = 1.0f;
     float m_flipStartRotation = 0.0f;
     float m_flipDirection = 1.0f;
+    bool m_bIsLanded = false;
 }

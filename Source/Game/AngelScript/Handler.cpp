@@ -315,19 +315,29 @@ static Variable GetTransform2DVariableData(void* pObj)
 	variableToReturn.m_type = "Transform2D";
 	variableToReturn.m_value = StringL::Format("m_pos : %f, %f | m_scale : %f, %f | m_rot : %f", pos.x, pos.y, scale.x, scale.y, rotation);
 
-	Variable& memberPos = variableToReturn.m_members.Add();
-	memberPos.m_name = "m_pos";
-	memberPos.m_type = "Vec2";
-	memberPos.m_value = StringL::Format("%f, %f", pos.x, pos.y);
-	Variable& memberScale = variableToReturn.m_members.Add();
-	memberScale.m_name = "m_scale";
-	memberScale.m_type = "Vec2";
-	memberScale.m_value = StringL::Format("%f, %f", scale.x, scale.y);
+	variableToReturn.m_members.Add(AngelScript::GetVariableVec2("m_pos", pos));
+	variableToReturn.m_members.Add(AngelScript::GetVariableVec2("m_scale", scale));
+	variableToReturn.m_members.Add(AngelScript::GetVariableFloat("m_rot", rotation));
 
-	Variable& memberRotation = variableToReturn.m_members.Add();
-	memberRotation.m_name = "y";
-	memberRotation.m_type = "float";
-	memberRotation.m_value = StringL::Format("%f", rotation);
+	return variableToReturn;
+}
+
+static Variable GetCamera2DVariableData(void* pObj)
+{
+	Camera2D& camera = *(Camera2D*)pObj;
+
+	const float zoom = camera.GetZoom();
+	const glm::vec2 pos = camera.GetPosition();
+	const glm::vec2 normalizedPos = camera.GetNormalizedPosition();
+	const glm::uvec2 res = camera.GetResolution();
+	Variable variableToReturn;
+	variableToReturn.m_type = "Camera2D";
+	variableToReturn.m_value = StringL::Format("m_zoom : %f | m_position : %f, %f | m_normalizedPosition : %f, %f | m_screenResolution : %u, %u", zoom, pos.x, pos.y, normalizedPos.x, normalizedPos.y, res.x, res.y);
+	
+	variableToReturn.m_members.Add(AngelScript::GetVariableFloat("m_zoom", zoom));
+	variableToReturn.m_members.Add(AngelScript::GetVariableVec2("m_position", pos));
+	variableToReturn.m_members.Add(AngelScript::GetVariableVec2("m_normalizedPosition", normalizedPos));
+	variableToReturn.m_members.Add(AngelScript::GetVariableVec2("m_screenResolution", glm::vec2(res.x, res.y)));
 
 	return variableToReturn;
 }
@@ -511,6 +521,7 @@ void Hail::AngelScript::Handler::RegisterAngelScriptCamera2D()
 {
 	bool bResult;
 	bResult = m_pTypeRegistry->RegisterType("Camera2D", 0, asOBJ_REF | asOBJ_NOCOUNT, H_FILE_LINE); H_ASSERT(bResult, "Failed to register Camera func");
+	bResult = m_pTypeRegistry->RegisterVariableFunction("Camera2D", &GetCamera2DVariableData); H_ASSERT(bResult, "Failed to register Camera func");
 	bResult = m_pTypeRegistry->RegisterClassMethod("Camera2D", { "GetResolution", "Vec2" }, {}, asFUNCTION(Camera2D_GetResolution), asCALL_CDECL_OBJFIRST, H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Camera func");
 	bResult = m_pTypeRegistry->RegisterClassMethod("Camera2D", { "SetResolution", "void" }, { { "x", "uint" }, { "y", "uint" } }, asFUNCTION(Camera2D_SetResolution), asCALL_CDECL_OBJFIRST, H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Camera func");
 	bResult = m_pTypeRegistry->RegisterClassMethod("Camera2D", { "GetPosition", "Vec2" }, {}, asFUNCTION(Camera2D_GetPosition), asCALL_CDECL_OBJFIRST, H_FILE_LINE);  H_ASSERT(bResult, "Failed to register Camera func");

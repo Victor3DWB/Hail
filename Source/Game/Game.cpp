@@ -50,7 +50,7 @@ namespace
 	Hail::GUID debugGridGuid;
 
 	Hail::EntityHandle g_playerHandle;
-	Hail::EntityHandle g_linePhysicsEntities[2];
+	Hail::EntityHandle g_linePhysicsEntities[3];
 	Hail::EntityHandle g_spherePhysicsEntities[5];
 
 	// Stable data so that the script systems pointer is correct, might update to a per frame structure
@@ -79,6 +79,7 @@ namespace Hail
 		scriptManagerInitParams.m_pComponentManager = &m_componentManager;
 		scriptManagerInitParams.m_pEntityManager = &m_entityManager;
 		scriptManagerInitParams.m_pHandler = m_pAsHandler;
+		scriptManagerInitParams.m_pPhysicsSystem = &m_physicsSystem;
 		m_scriptManager.Init(scriptManagerInitParams);
 
 		m_componentManager.Init(&m_entityManager);
@@ -88,6 +89,8 @@ namespace Hail
 		capabilityInitParams.m_pComponentManager = &m_componentManager;
 		capabilityInitParams.m_pScriptManager = &m_scriptManager;
 		m_capabilitySystem.Init(capabilityInitParams);
+
+		m_physicsSystem.Init(&m_entityManager);
 
 		spaceShipGuid.m_data1 = 3698324670;
 		spaceShipGuid.m_data2 = 58616;
@@ -154,22 +157,28 @@ namespace Hail
 
 
 		g_linePhysicsEntities[0] = m_entityManager.CreateEntity();
-		m_entityManager.GetEntityFromIndex(g_linePhysicsEntities[0]).m_transform.SetPosition({ 0.5f, 0.5f });
+		m_entityManager.GetEntityFromIndex(g_linePhysicsEntities[0]).m_transform.SetPosition({ -250.5f, -100.5f });
 		g_linePhysicsEntities[1] = m_entityManager.CreateEntity();
-		m_entityManager.GetEntityFromIndex(g_linePhysicsEntities[1]).m_transform.SetPosition({ 0.5f, 50.75f });
+		m_entityManager.GetEntityFromIndex(g_linePhysicsEntities[1]).m_transform.SetPosition({ 250.5f, -100.5f });
+		g_linePhysicsEntities[2] = m_entityManager.CreateEntity();
+		m_entityManager.GetEntityFromIndex(g_linePhysicsEntities[2]).m_transform.SetPosition({ 0.5f, 0.5f });
 		PhysicsCollisionProperties linePhysicsProperties;
-		linePhysicsProperties.m_mass = 0.f;
+		linePhysicsProperties.m_flags = PhysicsCollisionProperties::EFlags::Static;
+		linePhysicsProperties.m_friction = 1.0f;
 
 		PhysicsLineData lineData;
-		lineData.m_length = 1500.4f;
-		lineData.m_rotation = Math::PIf;// + 0.914;
+		lineData.m_length = 500.4f;
+		lineData.m_rotation = Math::PIf + 0.914;
 		m_componentManager.AddComponentToEntity(m_entityManager.GetEntityFromIndex(g_linePhysicsEntities[0]).GetId(), EComponentType::PhysicsComponent);
 		*m_componentManager.GetPhysicsComponent(m_entityManager.GetEntityFromIndex(g_linePhysicsEntities[0]).GetId()) = m_physicsSystem.CreatePhysicsLineComponent(lineData, linePhysicsProperties);
-		lineData.m_rotation = Math::PIf;// -0.814;
+		lineData.m_rotation = Math::PIf -0.814;
 		m_componentManager.AddComponentToEntity(m_entityManager.GetEntityFromIndex(g_linePhysicsEntities[1]).GetId(), EComponentType::PhysicsComponent);
 		*m_componentManager.GetPhysicsComponent(m_entityManager.GetEntityFromIndex(g_linePhysicsEntities[1]).GetId()) = m_physicsSystem.CreatePhysicsLineComponent(lineData, linePhysicsProperties);
+		lineData.m_rotation = Math::PIf;
+		m_componentManager.AddComponentToEntity(m_entityManager.GetEntityFromIndex(g_linePhysicsEntities[2]).GetId(), EComponentType::PhysicsComponent);
+		*m_componentManager.GetPhysicsComponent(m_entityManager.GetEntityFromIndex(g_linePhysicsEntities[2]).GetId()) = m_physicsSystem.CreatePhysicsLineComponent(lineData, linePhysicsProperties);
 
-		const glm::vec2 spawnPositions[5] = { { -80.f, -350.f }, { 80.f, -350.f }, { -40.f, -100.f }, { 0.f, -100.f }, { 40.f, -100.f } };
+		const glm::vec2 spawnPositions[5] = { { -400.f, -500.f }, { 200.f, -350.f }, { -100.f, -100.f }, { -80.f, -200.f }, { 100.f, -100.f } };
 
 		for (uint32 i = 0; i < 5; i++)
 		{
@@ -179,9 +188,12 @@ namespace Hail
 		}
 
 		PhysicsCollisionProperties circlePhysicsProperties;
-		circlePhysicsProperties.m_mass = 10.0f;
+		circlePhysicsProperties.m_mass = 1.10f;
+		circlePhysicsProperties.m_bounciness = 0.85;
+		circlePhysicsProperties.m_friction = 0.5;
+
 		PhysicsCircleData circlePhysicsData;
-		circlePhysicsData.m_radius = 20.015;
+		circlePhysicsData.m_radius = 50.015;
 		for (uint32 iTestEntites = 0; iTestEntites < 5; iTestEntites++)
 		{
 			m_componentManager.AddComponentToEntity(m_entityManager.GetEntityFromIndex(g_spherePhysicsEntities[iTestEntites]).GetId(), EComponentType::PhysicsComponent);
@@ -201,11 +213,15 @@ namespace Hail
 		}
 		m_componentManager.AddComponentToEntity(g_playerHandle, EComponentType::PhysicsComponent);
 		m_componentManager.AddComponentToEntity(g_playerHandle, EComponentType::SpriteComponent);
-		circlePhysicsProperties.m_mass = 0.0f;
+		circlePhysicsProperties.m_flags = PhysicsCollisionProperties::EFlags::GameplayDriven;
+		circlePhysicsData.m_radius = 20.015;
 		*m_componentManager.GetPhysicsComponent(g_playerHandle) = m_physicsSystem.CreatePhysicsCircleComponent(circlePhysicsData, circlePhysicsProperties);
 
 		m_componentManager.GetSpriteComponent(g_playerHandle)->m_bSizeRelativeToRenderTarget = false;
 		m_componentManager.GetSpriteComponent(g_playerHandle)->m_layer = 2;
+
+		m_entityManager.GetEntityFromIndex(g_playerHandle).m_transform.SetPosition({ 0.0f, 50.0f });
+
 
 		for (uint32_t i = 0; i < 5; i++)
 		{
@@ -233,7 +249,6 @@ namespace Hail
 		PhysicsUpdatePayload physicsUpdate;
 		physicsUpdate.m_deltaTime = deltaTime;
 		physicsUpdate.m_bShowDebugSymbols = true;
-		physicsUpdate.m_pEntityManager = &m_entityManager;
 		physicsUpdate.m_pPhysicComponents = &m_componentManager.GetPhysicsComponents();
 		physicsUpdate.p_commandPoolToFill = frameData.commandPoolToFill;
 		m_physicsSystem.UpdatePhysicsWorld(physicsUpdate);

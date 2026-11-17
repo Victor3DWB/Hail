@@ -18,7 +18,7 @@
 - [x] Create a basic PhysicSolver to support gameplay functionality.
 - [x] Angelscript, create a CreateComponent_XYZ function and system in the script manager. So this will be reflection of Angelscript data to drive gameplay systems.
 - [x] Drive sprites from ECS and camera from Angelscript
-- [] Query physics state functions from the physics system and expose this to AngelScript.
+- [x] Query physics state functions from the physics system and expose this to AngelScript. Add rolling to physics objects.
 - [] First movement gameplay prototype, ground and air
 
 

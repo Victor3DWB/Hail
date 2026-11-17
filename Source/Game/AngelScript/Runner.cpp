@@ -234,6 +234,7 @@ bool Hail::AngelScript::Runner::SetScriptDefinedComponents(const FilePath& compo
 			}
 		}
 	}
+	return true;
 }
 
 Capability* Hail::AngelScript::Runner::CreateCapabilityFromScriptFile(const CapabilityCreationRequest& creationRequest)
@@ -546,6 +547,7 @@ bool Hail::AngelScript::Runner::CreateScriptModuleInternal(String64 scriptName, 
 		memset(pFilePathAsCharBuffer, 0, 1024);
 		FromWCharToConstChar(scriptPath.Data(), pFilePathAsCharBuffer, 1024);
 		r = builderToWorkOn.AddSectionFromFile(pFilePathAsCharBuffer);
+		return true;
 	};
 
 	CScriptBuilder scriptBuilder;

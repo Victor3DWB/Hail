@@ -15,7 +15,14 @@ namespace Hail
 	enum class EPhysicShapeType
 	{
 		Circle,
-		Line
+		Line,
+		Count
+	};
+
+	constexpr const char* pEPhysicShapeTypeNames[(uint32)EPhysicShapeType::Count] =
+	{
+		"Circle",
+		"Line"
 	};
 
 	struct PhysicsLineData
@@ -31,14 +38,26 @@ namespace Hail
 
 	struct PhysicsCollisionProperties
 	{
-		float m_mass = 1.0; // A mass < 0.f is a static object
-		float m_drag = 0.01;
-		float m_friction = 1.0;
+		float m_mass = 1.0;
+		float m_drag = 0.001;
+		float m_friction = 0.5;
 		float m_bounciness = 0.20; // 0 equals no bounce and 1.0 == perfect reflection
 
-		// TODO: 
-		//uint32 m_flags = 0; // To get if the component has collided this frame and with what
-		//uint32 m_tags = 0; // What am I in a gameplaySense;
+		float m_angularVelocity = 0.0f;
+		float m_angularAcceleration = 0.0f;
+		float m_momentOfInertia = 0.0f;
+		float m_inverseMomentOfInertia = 0.0f;
+
+		float m_torque = 0.0f;
+
+		enum EFlags
+		{
+			Static = 1 << 0,
+			GameplayDriven = 1 << 1, // When the gameplay drives the movement and the physics is for collision detection
+		};
+
+		uint32 m_flags = 0; // 
+		//uint32 m_tags = 0; // What am I in a gameplay sense;
 	};
 
 	struct PhysicsComponent
@@ -49,11 +68,6 @@ namespace Hail
 		EPhysicShapeType m_shape = EPhysicShapeType::Circle;
 		glm::vec2 m_velocity = glm::vec2(0.0);
 		PhysicsCollisionProperties m_props;
-	};
-
-	struct PhysicsInfluenceComponent
-	{
-		glm::vec2 m_force = glm::vec2(0.0);
 	};
 
 	struct AngelscriptCapabilityComponent

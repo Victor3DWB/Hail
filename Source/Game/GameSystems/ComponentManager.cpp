@@ -3,6 +3,7 @@
 
 #include "angelscript.h"
 #include "Angelscript/TypeRegistry.h"
+#include "PhysicsSystem.h"
 
 namespace Hail
 {

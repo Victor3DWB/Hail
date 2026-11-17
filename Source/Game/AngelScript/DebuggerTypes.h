@@ -45,6 +45,14 @@ namespace Hail
 			GrowingArray<Variable> m_members;
 		};
 
+		Variable GetVariableBool(const char* pName, bool value);
+		Variable GetVariableInt32(const char* pName, int32 value);
+		Variable GetVariableUint32(const char* pName, uint32 value);
+		Variable GetVariableFloat(const char* pName, float value);
+		Variable GetVariableVec2(const char* pName, glm::vec2 value);
+		Variable GetVariableVec3(const char* pName, glm::vec3 value);
+		Variable GetVariableVec4(const char* pName, glm::vec4 value);
+
 		typedef Variable(*ToVariableCallback)(void* obj);
 
 		struct BuildErrorInfo

@@ -269,14 +269,14 @@ TextureResource* Hail::TextureManager::LoadTextureRequestInternal(const FilePath
 	TextureWithView textureAndView{};
 	if (compiledTextureData.loadState == TEXTURE_LOADSTATE::LOADED_TO_RAM)
 	{
-		const char* pTextureName = path.Object().Name().ToCharString();
+		Hail::StringL textureName = path.Object().Name().ToCharString();
 		textureAndView.m_pTexture= CreateTextureInternalNoLoad();
-		textureAndView.m_pTexture->textureName = pTextureName;
+		textureAndView.m_pTexture->textureName = textureName;
 		textureAndView.m_pTexture->m_metaResource = metaData;
 		textureAndView.m_pTexture->m_index = TextureResource::g_idCounter++;
 		textureAndView.m_pTexture->m_properties = compiledTextureData.properties;
 		textureAndView.m_pView = CreateTextureView();
-		m_loadRequests.Add({ pTextureName, compiledTextureData, (uint32)m_loadedTextures.Size() });
+		m_loadRequests.Add({ textureName, compiledTextureData, (uint32)m_loadedTextures.Size() });
 
 		m_loadedTextures.Add(textureAndView);
 	}

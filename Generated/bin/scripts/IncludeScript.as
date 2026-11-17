@@ -82,13 +82,11 @@ class PlayerMovementCapability : Capability
 {
     void Setup()
     {
-        if (CreateCapabilityForEntity(GetOwningEntity(), "PlayerWingBeatCapability", "WingCapability"))
+        if (CreateCapabilityForEntity(GetOwningEntity(), "PlayerGroundMovementCapability", "MovementWalkingCapability"))
         {
-            Print("Successfully created the Wing Capability");    
         }
         else
         {
-            Print("Did not successfully create the Wing Capability");    
         }
     }
 
@@ -99,12 +97,14 @@ class PlayerMovementCapability : Capability
 
     bool ShouldActivate()
     {
-        return m_bActiveCapability == true;
+        PlayerComponent@ playerComponent = GetOrCreatePlayerComponent(GetOwningEntity());
+        return playerComponent.m_bIsLanded == false;
     }
 
     bool ShouldDeactivate()
     {
-        return m_bActiveCapability == false;
+        PlayerComponent@ playerComponent = GetOrCreatePlayerComponent(GetOwningEntity());
+        return playerComponent.m_bIsLanded == true;
     }
 
     void TickActive(float deltaTime)
@@ -112,6 +112,28 @@ class PlayerMovementCapability : Capability
         Vec2 rightVector = Vec2(1.0, 0.0);
         Vec2 upVector = Vec2(0.0, 1.0);
         PlayerComponent@ playerComponent = GetOrCreatePlayerComponent(GetOwningEntity());
+
+        Array<PhysicsCollisionEvent>@ events = GetCollisionEventsForEntity(GetOwningEntity());
+        if (events !is null)
+        {
+            uint collisionEventsCount = events.Size();
+
+            for (uint i = 0; i < collisionEventsCount; ++i)
+            {
+                float directionToUp = Dot(events[i].m_collisionInfo.m_contactNormal, upVector); 
+                if ( EPhysicsCollisionEventType(events[i].m_type) == EPhysicsCollisionEventType::Enter && directionToUp > 0.97)
+                {
+                    playerComponent.m_bIsLanded = true;
+                    Transform2D@ playerTransform = GetEntityTransform(GetOwningEntity());
+                    Vec2 currentPos = playerTransform.GetPosition();
+                    playerTransform.SetPosition(currentPos + events[i].m_collisionInfo.m_contactNormal * events[i].m_collisionInfo.m_penetrationDepth);
+                    playerComponent.m_velocity = Vec2(0.0);
+                    playerComponent.m_forwardForce = 0.0;
+                    playerComponent.m_upwardForce = 0.0;
+                    return;
+                }
+            }
+        }
 
         Vec2 gravityForce = Vec2(0.0, playerComponent.m_gravity * 0.2);
         float drag = playerComponent.m_drag * 0.0;
@@ -179,6 +201,12 @@ class PlayerMovementCapability : Capability
             }
         }
         
+        PhysicsComponent@ physicsComponent = GetPhysicsComponent(GetOwningEntity());
+        if (physicsComponent !is null)
+        {
+            physicsComponent.m_velocity = playerComponent.m_velocity * 10.0;
+        }
+
         playerComponent.m_currentRotationRadian = currentFrameRotation;
         playerComponent.m_currentDirection = Vec2(cos(currentFrameRotation), sin(currentFrameRotation));
 
@@ -234,51 +262,43 @@ class PlayerMovementCapability : Capability
         playerComponent.m_velocity = playerComponent.m_velocity + (externalAcceleration + dragAcceleration) * deltaTime;
 
 
+        Transform2D@ playerTransform = GetEntityTransform(GetOwningEntity());
+        Vec2 currentPos = playerTransform.GetPosition();
         // Reset everything
         if (GetButtonInput(eInputAction::DebugAction1, 0) == 1)
         {
-            m_pos = Vec2(0.0);
+            playerTransform.SetPosition(Vec2(0.0));
             playerComponent.m_velocity = Vec2(0.0);
             playerComponent.m_forwardForce = 0.0;
             playerComponent.m_upwardForce = 0.0;
         }
         
-        m_pos = m_pos + playerComponent.m_velocity;
-        GetCamera2D().SetPosition(m_pos);
-        Transform2D@ playerTransform = GetEntityTransform(GetOwningEntity());
-        playerTransform.SetPosition(m_pos);
+        currentPos = currentPos + playerComponent.m_velocity;
+        GetCamera2D().SetPosition(currentPos);
+        playerTransform.SetPosition(currentPos);
         
-        DrawCircle(m_pos, m_radius, ColorCyan);
-        DrawLine(m_pos, m_pos + playerComponent.m_velocity, ColorRed);
-        //DrawLine(m_pos, m_pos + directionForce * 1.0, ColorOrange);
+        DrawCircle(currentPos, m_radius, ColorCyan);
+        DrawLine(currentPos, currentPos + playerComponent.m_velocity, ColorRed);
+        //DrawLine(currentPos, currentPos + directionForce * 1.0, ColorOrange);
         
-        DrawLine(m_pos, m_pos + (playerComponent.m_currentDirection * playerComponent.m_forwardForce) * 1.0, ColorOrange);
-        DrawLine(m_pos, m_pos + (currentUpwardsDirection) * 50.0, ColorRed);
-        DrawLine(m_pos, m_pos + (playerComponent.m_currentDirection) * 50.0, ColorCyan);
-
+        DrawLine(currentPos, currentPos + (playerComponent.m_currentDirection * playerComponent.m_forwardForce) * 1.0, ColorOrange);
+        DrawLine(currentPos, currentPos + (currentUpwardsDirection) * 50.0, ColorRed);
+        DrawLine(currentPos, currentPos + (playerComponent.m_currentDirection) * 50.0, ColorCyan);
     }
 
     void TickInactive(float deltaTime)
     {
-        if (GetButtonInput(eInputAction::PlayerAction2, 0) == 1)
-        {
-            m_bActiveCapability = true;
-        }
     }
 
     void OnActivated()
     {
-        Print("Activated player capability from C++");
     }
 
     void OnDeactivated()
     {
-        Print("Deactivated player capability from C++");
     }
 
     float m_radius = 10.1;
     Vec2 m_pos = Vec2(0.0);
-    bool m_bActiveCapability = true;
     float m_forceToRemovePerFrame = 10.25;
-
 }
